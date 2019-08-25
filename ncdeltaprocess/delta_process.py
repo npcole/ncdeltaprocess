@@ -109,7 +109,7 @@ class Translator(object):
         return block.add_node(node.Image(contents=contents, attributes=attributes))
         
     def make_string_node(self, block, contents, attributes):
-        block.add_node(node.TextLine(contents=contents, attributes=attributes))
+        return block.add_node(node.TextLine(contents=contents, attributes=attributes))
     
     def ops_to_internal_representation(self, delta_ops):
         this_document = QDocument()
@@ -140,6 +140,9 @@ class Translator(object):
                         previous_node = self.make_string_node(**node_arguments)
                     else:
                         raise ValueError("I don't know how to add this node. Default string handler failed. Node contents is %s" % node_arguments['contents'])
+                ## The following line allows custom node creators to split a block in two if necessary -- for example
+                ## a custom node adding a horizonal rule might do so.
+                this_block = previous_node.parent
         return this_document
       
     def is_block(insert_instruction):
