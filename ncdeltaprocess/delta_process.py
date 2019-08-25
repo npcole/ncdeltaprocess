@@ -20,96 +20,6 @@ class Translator(object):
         self.settings = {
             'list_text_blocks_are_p': True
         }
-        
-        
-    def header_test(self, qblock, this_document, previous_block):
-        if 'header' in qblock['attributes']:
-            return True
-        else:
-            return False
-        
-    def list_test(self, qblock, this_document, previous_block):
-        if 'list' in qblock['attributes']:
-            return True
-        else:
-            return False
-    
-    def make_header_block(self, qblock, this_document, previous_block):
-        this_block = this_document.add_block(
-            block.TextBlockHeading(parent=this_document, last_block=previous_block, attributes=qblock['attributes'].copy())
-        )
-        return this_block
-    
-    def make_standard_text_block(self, qblock, this_document, previous_block):
-        this_block = this_document.add_block(
-            block.TextBlockParagraph(parent=this_document, 
-            last_block=previous_block, 
-            attributes=qblock['attributes'].copy())
-            )
-        return this_block
-    
-    def make_list_block(self, qblock, this_document, previous_block):
-        container_block = None
-        if previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth == qblock['attributes'].get('indent', 0):
-            # perfect, we can use this.
-            container_block = previous_block.parent
-        ## how about the previous block is a more nested list?
-        elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth > qblock['attributes'].get('indent', 0):
-            working_block = previous_block.parent
-            searching_for_depth = qblock['attributes'].get('indent', 0)
-            while True:
-                if not working_block or not isinstance(working_block, block.ListBlock):
-                    break
-                if isinstance(working_block, block.ListBlock) and working_block.depth == searching_for_depth:
-                    container_block = working_block
-                    break
-                working_block = working_block.parent
-        ## We are in a list block, but isn't deep enough
-        elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth < qblock['attributes'].get('indent', 0):
-            container_block = previous_block
-        ## we'd better use the base document
-        else:
-            container_block = this_document
-        ## We aren't done yet. We might need to create nested lists
-        while qblock['attributes'].get('indent', 0) > container_block.depth:
-            fake_attributes = qblock['attributes'].copy()
-            try:
-                del fake_attributes['indent']
-            except KeyError:
-                pass
-            container_block = container_block.add_block(
-                block.ListBlock(parent=container_block, last_block=container_block, attributes=fake_attributes)
-                )
-        
-        # finally, we should have a list block to add our current block to:
-        if self.settings['list_text_blocks_are_p']:
-            this_block = container_block.add_block(
-                block.TextBlockParagraph(parent=this_document, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy())
-            )
-        else:
-            this_block = container_block.add_block(
-                block.TextBlockPlain(parent=this_document, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy())
-            )
-        return this_block
-        
-    def image_node_test(self, block, contents, attributes):
-        if isinstance(contents, dict) and 'image' in attributes:
-            return True
-        else:
-            return False
-            
-    def make_image_node(self, block, contents, attributes):
-        return block.add_node(node.Image(contents=contents, attributes=attributes))
-        
-    def make_string_node(self, block, contents, attributes):
-        return block.add_node(node.TextLine(contents=contents, attributes=attributes))
     
     def ops_to_internal_representation(self, delta_ops):
         this_document = QDocument()
@@ -216,3 +126,95 @@ class Translator(object):
                     temporary_nodes.append(instruction)
                 else:
                     yield(instruction)
+    
+    ##### Test functions and node/block creators follow #####
+    
+    def header_test(self, qblock, this_document, previous_block):
+        if 'header' in qblock['attributes']:
+            return True
+        else:
+            return False
+        
+    def list_test(self, qblock, this_document, previous_block):
+        if 'list' in qblock['attributes']:
+            return True
+        else:
+            return False
+    
+    def make_header_block(self, qblock, this_document, previous_block):
+        this_block = this_document.add_block(
+            block.TextBlockHeading(parent=this_document, last_block=previous_block, attributes=qblock['attributes'].copy())
+        )
+        return this_block
+    
+    def make_standard_text_block(self, qblock, this_document, previous_block):
+        this_block = this_document.add_block(
+            block.TextBlockParagraph(parent=this_document, 
+            last_block=previous_block, 
+            attributes=qblock['attributes'].copy())
+            )
+        return this_block
+    
+    def make_list_block(self, qblock, this_document, previous_block):
+        container_block = None
+        if previous_block and isinstance(previous_block.parent, block.ListBlock) and \
+        previous_block.parent.depth == qblock['attributes'].get('indent', 0):
+            # perfect, we can use this.
+            container_block = previous_block.parent
+        ## how about the previous block is a more nested list?
+        elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
+        previous_block.parent.depth > qblock['attributes'].get('indent', 0):
+            working_block = previous_block.parent
+            searching_for_depth = qblock['attributes'].get('indent', 0)
+            while True:
+                if not working_block or not isinstance(working_block, block.ListBlock):
+                    break
+                if isinstance(working_block, block.ListBlock) and working_block.depth == searching_for_depth:
+                    container_block = working_block
+                    break
+                working_block = working_block.parent
+        ## We are in a list block, but isn't deep enough
+        elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
+        previous_block.parent.depth < qblock['attributes'].get('indent', 0):
+            container_block = previous_block
+        ## we'd better use the base document
+        else:
+            container_block = this_document
+        ## We aren't done yet. We might need to create nested lists
+        while qblock['attributes'].get('indent', 0) > container_block.depth:
+            fake_attributes = qblock['attributes'].copy()
+            try:
+                del fake_attributes['indent']
+            except KeyError:
+                pass
+            container_block = container_block.add_block(
+                block.ListBlock(parent=container_block, last_block=container_block, attributes=fake_attributes)
+                )
+        
+        # finally, we should have a list block to add our current block to:
+        if self.settings['list_text_blocks_are_p']:
+            this_block = container_block.add_block(
+                block.TextBlockParagraph(parent=this_document, 
+                last_block=previous_block, 
+                attributes=qblock['attributes'].copy())
+            )
+        else:
+            this_block = container_block.add_block(
+                block.TextBlockPlain(parent=this_document, 
+                last_block=previous_block, 
+                attributes=qblock['attributes'].copy())
+            )
+        return this_block
+        
+    def image_node_test(self, block, contents, attributes):
+        if isinstance(contents, dict) and 'image' in attributes:
+            return True
+        else:
+            return False
+            
+    def make_image_node(self, block, contents, attributes):
+        return block.add_node(node.Image(contents=contents, attributes=attributes))
+        
+    def make_string_node(self, block, contents, attributes):
+        return block.add_node(node.TextLine(contents=contents, attributes=attributes))
+    
