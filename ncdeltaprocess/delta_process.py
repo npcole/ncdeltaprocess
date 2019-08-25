@@ -119,7 +119,7 @@ def yield_blocks(delta_ops):
             #    last_node_completes_block = False
             #if block_marker not in insert_instruction:
             #    temporary_nodes.append(instruction)
-            elif insert_instruction == block_marker:
+            if insert_instruction == block_marker:
                 yield_this =  {'contents': temporary_nodes[:],}
                 for k in instruction.keys():
                     if k in block_keys:
