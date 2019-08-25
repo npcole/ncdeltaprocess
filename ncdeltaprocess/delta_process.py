@@ -112,13 +112,13 @@ def yield_blocks(delta_ops):
             if not 'attributes' in instruction:
                 instruction['attributes'] = {}
             block_attributes = instruction['attributes']
-            if insert_instruction.endswith(block_marker):
-                # then we have complete blocks.  
-                last_node_completes_block = True
-            else:
-                last_node_completes_block = False
-            if block_marker not in insert_instruction:
-                temporary_nodes.append(instruction)
+            #if insert_instruction.endswith(block_marker):
+            #    # then we have complete blocks.  
+            #    last_node_completes_block = True
+            #else:
+            #    last_node_completes_block = False
+            #if block_marker not in insert_instruction:
+            #    temporary_nodes.append(instruction)
             elif insert_instruction == block_marker:
                 yield_this =  {'contents': temporary_nodes[:],}
                 for k in instruction.keys():
