@@ -157,15 +157,16 @@ class Translator(object):
     
     def make_list_block(self, qblock, this_document, previous_block):
         container_block = None
+        required_depth = qblock['attributes'].get('indent', 0)
         if previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth == qblock['attributes'].get('indent', 0):
+        previous_block.parent.depth == required_depth:
             # perfect, we can use this.
             container_block = previous_block.parent
         ## how about the previous block is a more nested list?
         elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth > qblock['attributes'].get('indent', 0):
+        previous_block.parent.depth > required_depth:
             working_block = previous_block.parent
-            searching_for_depth = qblock['attributes'].get('indent', 0)
+            searching_for_depth = required_depth
             while True:
                 if not working_block or not isinstance(working_block, block.ListBlock):
                     break
@@ -175,13 +176,13 @@ class Translator(object):
                 working_block = working_block.parent
         ## We are in a list block, but isn't deep enough
         elif previous_block and isinstance(previous_block.parent, block.ListBlock) and \
-        previous_block.parent.depth < qblock['attributes'].get('indent', 0):
+        previous_block.parent.depth < required_depth:
             container_block = previous_block
         ## we'd better use the base document
         else:
             container_block = this_document
         ## We aren't done yet. We might need to create nested lists
-        while qblock['attributes'].get('indent', 0) > container_block.depth:
+        while required_depth > container_block.depth:
             fake_attributes = qblock['attributes'].copy()
             try:
                 del fake_attributes['indent']
@@ -217,4 +218,7 @@ class Translator(object):
         
     def make_string_node(self, block, contents, attributes):
         return block.add_node(node.TextLine(contents=contents, attributes=attributes))
+    
+    
+    
     
