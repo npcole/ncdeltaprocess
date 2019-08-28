@@ -6,7 +6,10 @@ __all__ = [
     'TextBlockPlain',
     'TextBlockParagraph',
     'TextBlockHeading',
-    'ListBlock'
+    'ListBlock',
+    'TableBlock',
+    'TableRow',
+    'TableCell',
 ]
 
 
@@ -152,4 +155,35 @@ class ListBlock(RenderOpenCloseMixin, Block):
             these_contents.append(c.render_html())
             these_contents.append('</li>')
         return(''.join(these_contents))
+        
+class TableBlock(RenderOpenCloseMixin, Block):
+    def open_tag(self):
+        return '<table>'
+    
+    def close_tag(self):
+        return '</table>'
+        
+class TableRowBlock(RenderOpenCloseMixin, Block):
+    def __init__(self, row_id, *args, **keywords):
+        super(TableRowBlock, self).__init__(*args, **keywords)
+        self.row_id = row_id
+    
+    def get_tag(self):
+        if self.attributes.get('header', False):
+            return 'hr'
+        else:
+            return 'tr'
+    
+    def open_tag(self):
+        return '<%s>' % self.get_tag()
+    
+    def close_tag(self):
+        return '</%s>' % self.get_tag()
+    
+class TableCellBlock(RenderOpenCloseMixin, Block):
+    def open_tag(self):
+        return '<td>'
+        
+    def close_tag(self):
+        return '</td>'
     

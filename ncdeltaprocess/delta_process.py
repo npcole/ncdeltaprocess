@@ -9,6 +9,7 @@ class Translator(object):
         self.block_registry = {
             self.header_test: self.make_header_block,
             self.list_test: self.make_list_block,
+            self.table_cell_test: self.make_table_cell_block,
             # text blocks will be handled by default
         }
         
@@ -141,6 +142,10 @@ class Translator(object):
         else:
             return False
     
+    def table_cell_test(self, qblock, this_document, previous_block):
+        if qblock['attributes']:
+            return qblock['attributes'].get('table', False)
+    
     def make_header_block(self, qblock, this_document, previous_block):
         this_block = this_document.add_block(
             block.TextBlockHeading(parent=this_document, last_block=previous_block, attributes=qblock['attributes'].copy())
@@ -195,18 +200,76 @@ class Translator(object):
         # finally, we should have a list block to add our current block to:
         if self.settings['list_text_blocks_are_p']:
             this_block = container_block.add_block(
-                block.TextBlockParagraph(parent=this_document, 
+                block.TextBlockParagraph(
+                parent=container_block, 
                 last_block=previous_block, 
-                attributes=qblock['attributes'].copy())
+                attributes=qblock['attributes'].copy()
+                )
             )
         else:
             this_block = container_block.add_block(
-                block.TextBlockPlain(parent=this_document, 
+                block.TextBlockPlain(
+                parent=container_block, 
                 last_block=previous_block, 
-                attributes=qblock['attributes'].copy())
+                attributes=qblock['attributes'].copy()
+                )
             )
         return this_block
+    
+    def make_table_cell_block(self, qblock, this_document, previous_block):
+        print(qblock)
+        container_row = None
+        container_table = None
         
+        # best case scenario - we are in the same table row are the previous block
+        if previous_block and previous_block.parent and previous_block.parent.parent and isinstance(previous_block.parent.parent, block.TableRowBlock) and \
+        previous_block.parent.parent.row_id == qblock['attributes']['table']: # this would also be in attributes of previous block
+            container_row = previous_block.parent.parent
+            container_table = previous_block.parent.parent.parent
+        # next best case scenario - we are still in a table, but we need a new row
+        elif previous_block and previous_block.parent and previous_block.parent.parent and isinstance(previous_block.parent.parent, block.TableRowBlock):
+            container_table = previous_block.parent.parent
+            container_row = container_table.add_block(
+                block.TableRowBlock(qblock['attributes']['table'],
+                attributes=qblock['attributes'].copy()
+                )
+            )
+        else:
+            # worst case scenario, we need a table too.
+            # remove the id from the attributes
+            table_attributes = qblock['attributes'].copy()
+            del table_attributes['table']
+            
+            container_table = this_document.add_block(
+                block.TableBlock(
+                    attributes=table_attributes,
+                )
+            )
+            
+            container_row = container_table.add_block(
+                block.TableRowBlock(qblock['attributes']['table'],
+                attributes=qblock['attributes'].copy()
+                )
+            )
+        # now at last we can make the table Cell!
+        this_cell = container_row.add_block(
+            block.TableCellBlock(
+                attributes=qblock['attributes'].copy()
+            )
+        )
+        
+        # now we can add the contents of the cell
+        this_block = this_cell.add_block(
+            block.TextBlockPlain(
+            parent=container_row, 
+            last_block=previous_block, 
+            attributes=qblock['attributes'].copy()
+            )
+        )
+        
+        return this_block
+        
+    
     def image_node_test(self, block, contents, attributes):
         if isinstance(contents, dict) and 'image' in attributes:
             return True
@@ -218,6 +281,7 @@ class Translator(object):
         
     def make_string_node(self, block, contents, attributes):
         return block.add_node(node.TextLine(contents=contents, attributes=attributes))
+        
     
     
     
