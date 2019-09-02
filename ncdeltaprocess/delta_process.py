@@ -217,7 +217,15 @@ class Translator(object):
         return this_block
     
     def make_table_cell_block(self, qblock, this_document, previous_block):
-        print(qblock)
+        
+        # This can be exended easily to cover the 
+        # https://codepen.io/soccerloway/pen/WWJowj
+        # Better table plugin, that allows multi-line paragraphs in cells 
+        # and multi-span cells.  The appraoch is the same -- except that the 
+        # cells and rows both have an id, and the first check should be whether a block
+        # is part of the previous cell. 
+        # https://github.com/soccerloway/quill-better-table
+        
         container_row = None
         container_table = None
         
