@@ -22,6 +22,9 @@ class Translator(object):
             'list_text_blocks_are_p': True
         }
     
+    def translate_to_html(self, delta_ops):
+        return ops_to_internal_representation(delta_ops).to_html()
+    
     def ops_to_internal_representation(self, delta_ops):
         this_document = QDocument()
         previous_block = None
