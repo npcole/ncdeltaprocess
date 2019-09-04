@@ -45,10 +45,10 @@ A single-step `t.translate_to_html` combines these two steps.
 
 The Processor works by:
 
-    1. De-normalizing (i.e. de-compressing) the Quilljs Delta block format.
-    2. Processing each of the Delta `blocks` and their content into an internal representation of Blocks and Nodes (which, unlike the
-        Delta format itself, may be nested).
-    3. Converting that tree of Blocks and Nodes into an HTML format.
+1. De-normalizing (i.e. de-compressing) the Quilljs Delta block format.
+2. Processing each of the Delta `blocks` and their content into an internal representation of Blocks and Nodes (which, unlike the
+    Delta format itself, may be nested).
+3. Converting that tree of Blocks and Nodes into an HTML format.
     
 The Translator object itself maintains a registery of functions that can recognize a particular type of block, and then translate the 
 Delta 'block' into the internal block type.  So, for example, the function `header_test` examines a Delta block to see if it is a header, 
