@@ -1,0 +1,10 @@
+# use glob syntax.
+syntax: glob
+
+*pyc
+dist/*
+build/*
+ncquill.egg-info/
+.DS_Store
+.idea/*
+venv
