@@ -53,5 +53,5 @@ The Processor works by:
 The Translator object itself maintains a registery of functions that can recognize a particular type of block, and then translate the 
 Delta 'block' into the internal block type.  So, for example, the function `header_test` examines a Delta block to see if it is a header, 
 while the function `make_header_block` creates the internal representation.  The actual formatting of header blocks is controlled by the 
-`ncdeltaprocess.block.TextBlockHeading` class.
-
+`ncdeltaprocess.block.TextBlockHeading` class.  Nodes within each block likewise have formatters that are responsible for converting them 
+to html.
