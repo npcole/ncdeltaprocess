@@ -53,5 +53,11 @@ The Processor works by:
 The Translator object itself maintains a registery of functions that can recognize a particular type of block, and then translate the 
 Delta 'block' into the internal block type.  So, for example, the function `header_test` examines a Delta block to see if it is a header, 
 while the function `make_header_block` creates the internal representation.  The actual formatting of header blocks is controlled by the 
-`ncdeltaprocess.block.TextBlockHeading` class.  Nodes within each block likewise have formatters that are responsible for converting them 
-to html.
+`ncdeltaprocess.block.TextBlockHeading` class.  
+
+Nodes within each block likewise have formatters that are responsible for converting them to html, and the translator class 
+mantains a registry of tests and formatters for nodes that is the equivilent of the one for blocks.
+
+Every internal representation also has a single QDocument object that serves as the root of the tree.  Currently the functionality is
+limited, but this also provides an opportunity for extension.
+

@@ -44,6 +44,14 @@ class TextLine(RenderMixin, Node):
         # sans is default
     }
     
+    text_span_css = [
+        # quilljs attribute, css_attribute, translator
+        ('size', 'font-size', 'css_font_size'), 
+        ('font', 'font-family', 'allowed_fonts'),
+        ('color', 'color', None),
+        ('background', 'background-color', None)
+    ]
+    
     def __init__(self, *args, **keywords):
         super(TextLine, self).__init__(*args, **keywords)
         
@@ -65,11 +73,21 @@ class TextLine(RenderMixin, Node):
             if 'script' in self.attributes and self.attributes['script'] == this_s:
                 output = self.script_styles[this_s][0] + output + self.script_styles[this_s][1]
         
-        if 'size' in self.attributes and self.attributes['size'] in self.css_font_size:
-            output = '<span style="font-size: "%s">' % self.css_font_size[self.attributes['size']] + output + '</span>'
-        
-        if 'font' in self.attributes and self.attributes['font'] in self.allowed_fonts:
-            output = '<span style="font-family: "%s">' % self.allowed_fonts[self.attributes['font']] + output + '</span>'
+        css_styles = []
+        for this_test in self.text_span_css:
+            qflag, css_attribute, translator = this_test
+            if qflag in self.attributes:
+                if not translator:
+                    css_styles.append("%s: %s" % (css_attribute, self.attributes[qflag]))
+                else:
+                    translated = getattr(self, translator).get(self.attributes[qflag], None)
+                    if translated:
+                        css_styles.append("%s: %s" (css_attribute, translated))
+                    else:
+                        continue
+        if css_styles:
+            css_styles_string = ';'.join(css_styles)
+            output = '<span style="%s">' % (css_styles_string,) + output + '</span>'
         
         if 'link' in self.attributes:
             # Warning ... this needs to be carefully sanitized

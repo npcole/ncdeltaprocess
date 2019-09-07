@@ -1,7 +1,7 @@
 import unittest
 import ncdeltaprocess
 
-class TestTableAndList(unittest.Unittest):
+class TestTableAndList(unittest.TestCase):
     def test_table_and_list(self):
         """Test a table and nested list"""
         these_things = ncdeltaprocess.Translator().ops_to_internal_representation([
@@ -26,4 +26,7 @@ class TestTableAndList(unittest.Unittest):
         ])
         self.assertEqual(these_things.render_html(),
 """<table><tr><td>1</td><td>2</td><td>3</td><tr><td>b1</td><td>b2</td><td>b3</td></tr></tr></table><p></p><ol><li><ol><li><ol><li><p style=text-align: center>This is a test</p></li></ol></li></ol></li><li><p><strong>and so is this</strong></p></li></ol><p></p>""")
+
+if __name__ == '__main__':
+    unittest.main()
         
