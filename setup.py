@@ -12,7 +12,7 @@ setup(
     install_requires=['richtextpy'],
     packages=find_packages(),
     include_package_data=True,
-    license='Private Code',
+    license='BSD',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 3',
