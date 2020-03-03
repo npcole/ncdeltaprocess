@@ -35,7 +35,7 @@ The basic operation of the formatter is:
     t.ops_to_internal_representation([
         { 'insert': 'Gandalf', 'attributes': { 'bold': True } },
         { 'insert': ' the ' },
-        { 'insert': 'Grey', 'attributes': { 'italic': True } }
+        { 'insert': 'Grey', 'attributes': { 'italic': True } },
         { 'insert': '\n' },
     ]).to_html()
     
