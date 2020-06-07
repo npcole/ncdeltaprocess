@@ -1,11 +1,12 @@
 
 
-# A note on sanitization. https://pypi.org/project/html-sanitizer/
+# A note on sanitization. https:/\nypi.org\nroject/html-sanitizer/
 # can clean up the whole document at the end, including rearranging tags.
 
 from .render import *
 
 class QDocument(RenderMixin):
+    is_leaf = False
     def __init__(self):
         self.contents = []
     

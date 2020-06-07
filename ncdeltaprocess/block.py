@@ -6,7 +6,9 @@ __all__ = [
     'TextBlockPlain',
     'TextBlockParagraph',
     'TextBlockHeading',
+    'TextBlockCode',
     'ListBlock',
+    'ListItemBlock',
     'TableBlock',
     'TableRow',
     'TableCell',
@@ -36,7 +38,8 @@ def text_paragraph_style_inline(block):
 
 
 class Block(object):
-    """The contents of Block should be a list of nodes"""
+    is_leaf = False
+    """The contents of Block should be a list of nodes or other blocks."""
     def __init__(self, parent=None, contents=None, attributes=None, last_block=None):
         if contents:
             for content in contents:
@@ -58,6 +61,12 @@ class Block(object):
     
     def add_block(self, block):
         return self.add_node(block)
+    
+    def get_parents(self):
+        working_block = self
+        while hasattr(working_block, 'parent') and working_block.parent:
+            working_block = working_block.parent
+            yield working_block
     
     @property
     def depth(self):
@@ -109,6 +118,17 @@ class TextBlockParagraph(RenderOpenCloseMixin, TextBlockPlain):
     def close_tag(self):
         return '</%s>' % self.get_paragraph_tag()
 
+class TextBlockCode(RenderOpenCloseMixin, TextBlockPlain):
+    def open_tag(self):
+        inline_style = text_paragraph_style_inline(self)
+        if inline_style:
+            return f'<code style={inline_style}><pre>'
+        else:
+            return '<code><pre>'
+        
+    def close_tag(self):
+        return '</code></pre>'
+    
 
 class TextBlockHeading(RenderOpenCloseMixin, Block):
     def get_header_tag(self):
@@ -147,14 +167,13 @@ class ListBlock(RenderOpenCloseMixin, Block):
     
     def close_tag(self):
         return self._tags_list_type[self.attributes['list']][1]
+                
+class ListItemBlock(RenderOpenCloseMixin, Block):
+    def open_tag(self):
+        return '<li>'
     
-    def render_contents_html(self):
-        these_contents = []
-        for c in self.contents:
-            these_contents.append('<li>')
-            these_contents.append(c.render_html())
-            these_contents.append('</li>')
-        return(''.join(these_contents))
+    def close_tag(self):
+        return '</li>'
         
 class TableBlock(RenderOpenCloseMixin, Block):
     def open_tag(self):
@@ -186,4 +205,15 @@ class TableCellBlock(RenderOpenCloseMixin, Block):
         
     def close_tag(self):
         return '</td>'
+
+class TableColumnDescriptor(RenderOpenCloseMixin, Block):
+    def open_tag(self):
+        if 'width' in self.attributes:
+            w = self.attributes['width']
+            return f'<col style="width: {w}">'
+        else:
+            return '<col>'
+    
+    def close_tag(self):
+        return '</col>'
     
