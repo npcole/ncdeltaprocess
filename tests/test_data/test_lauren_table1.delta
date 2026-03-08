@@ -1,0 +1,2658 @@
+{"ops": [
+    {
+        "insert": "PART I"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "align": "center"
+        }
+    },
+    {
+        "insert": "\n"
+    },
+    {
+        "insert": "\n\n\n",
+        "attributes": {
+            "table-col": {
+                "width": "100"
+            }
+        }
+    },
+    {
+        "insert": "Name of State or States"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-qm36",
+                "cell": "cell-iiel"
+            },
+            "row": "row-qm36",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Number of seats allotted in the Constituent Assembly"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-qm36",
+                "cell": "cell-gcpn"
+            },
+            "row": "row-qm36",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Authority for the purpose of the choosing of the representatives in the Constituent Assembly"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-qm36",
+                "cell": "cell-vyx4"
+            },
+            "row": "row-qm36",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-nuny",
+                "cell": "cell-g3pv"
+            },
+            "row": "row-nuny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "2"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-nuny",
+                "cell": "cell-99r8"
+            },
+            "row": "row-nuny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "3"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-nuny",
+                "cell": "cell-7mhi"
+            },
+            "row": "row-nuny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "HYDERABAD"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-cahg",
+                "cell": "cell-qypj"
+            },
+            "row": "row-cahg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "16"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-cahg",
+                "cell": "cell-8ih5"
+            },
+            "row": "row-cahg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Hyderabad."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-cahg",
+                "cell": "cell-5sby"
+            },
+            "row": "row-cahg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "MYSORE"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-uwdv",
+                "cell": "cell-hmoa"
+            },
+            "row": "row-uwdv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "7"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-uwdv",
+                "cell": "cell-m8ep"
+            },
+            "row": "row-uwdv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Mysore."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-uwdv",
+                "cell": "cell-lyqy"
+            },
+            "row": "row-uwdv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "KASHMIR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hmat",
+                "cell": "cell-b58m"
+            },
+            "row": "row-hmat",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "4"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hmat",
+                "cell": "cell-s13x"
+            },
+            "row": "row-hmat",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Kashmir."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hmat",
+                "cell": "cell-2noq"
+            },
+            "row": "row-hmat",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "BARODA"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-jv39",
+                "cell": "cell-n78y"
+            },
+            "row": "row-jv39",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "3"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-jv39",
+                "cell": "cell-w37q"
+            },
+            "row": "row-jv39",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Baroda."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-jv39",
+                "cell": "cell-dsg0"
+            },
+            "row": "row-jv39",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "TRAVANCORE"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-1736",
+                "cell": "cell-82rf"
+            },
+            "row": "row-1736",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "6"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-1736",
+                "cell": "cell-0rdt"
+            },
+            "row": "row-1736",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Travancore."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-1736",
+                "cell": "cell-vdqt"
+            },
+            "row": "row-1736",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "COCHIN"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-m9sg",
+                "cell": "cell-6o2x"
+            },
+            "row": "row-m9sg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-m9sg",
+                "cell": "cell-661s"
+            },
+            "row": "row-m9sg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Cochin."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-m9sg",
+                "cell": "cell-i5to"
+            },
+            "row": "row-m9sg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "JODHPUR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ytgv",
+                "cell": "cell-odhq"
+            },
+            "row": "row-ytgv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "2"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ytgv",
+                "cell": "cell-f886"
+            },
+            "row": "row-ytgv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Jodhpur."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ytgv",
+                "cell": "cell-mtby"
+            },
+            "row": "row-ytgv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "JAIPUR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-giny",
+                "cell": "cell-5x6a"
+            },
+            "row": "row-giny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "3"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-giny",
+                "cell": "cell-xsvy"
+            },
+            "row": "row-giny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Jaipur."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-giny",
+                "cell": "cell-uzj8"
+            },
+            "row": "row-giny",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "BIKANER"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hhyz",
+                "cell": "cell-8zw4"
+            },
+            "row": "row-hhyz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hhyz",
+                "cell": "cell-10t2"
+            },
+            "row": "row-hhyz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Bikaner."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hhyz",
+                "cell": "cell-18wm"
+            },
+            "row": "row-hhyz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "BHOPAL"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-u23c",
+                "cell": "cell-f88z"
+            },
+            "row": "row-u23c",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-u23c",
+                "cell": "cell-tnnr"
+            },
+            "row": "row-u23c",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Bhopal."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-u23c",
+                "cell": "cell-x8p2"
+            },
+            "row": "row-u23c",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "KOLHAPUR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-szqz",
+                "cell": "cell-8o1l"
+            },
+            "row": "row-szqz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-szqz",
+                "cell": "cell-7lkk"
+            },
+            "row": "row-szqz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Kolhapur."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-szqz",
+                "cell": "cell-z52u"
+            },
+            "row": "row-szqz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "MAYURBHANJ"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lf0h",
+                "cell": "cell-ar3y"
+            },
+            "row": "row-lf0h",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lf0h",
+                "cell": "cell-5rwl"
+            },
+            "row": "row-lf0h",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Mayurbhanj."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lf0h",
+                "cell": "cell-633n"
+            },
+            "row": "row-lf0h",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "SIKKIM AND COOCH BEHAR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-pzqb",
+                "cell": "cell-zj6f"
+            },
+            "row": "row-pzqb",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-pzqb",
+                "cell": "cell-k50f"
+            },
+            "row": "row-pzqb",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Cooch Behar."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-pzqb",
+                "cell": "cell-o7pq"
+            },
+            "row": "row-pzqb",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "TRIPURA"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-709w",
+                "cell": "cell-38hs"
+            },
+            "row": "row-709w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "MANIPUR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-709w",
+                "cell": "cell-38hs"
+            },
+            "row": "row-709w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "KHASI STATES"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-709w",
+                "cell": "cell-38hs"
+            },
+            "row": "row-709w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-709w",
+                "cell": "cell-7iwx"
+            },
+            "row": "row-709w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Tripura."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-709w",
+                "cell": "cell-79oo"
+            },
+            "row": "row-709w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "RAMPUR"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lv7d",
+                "cell": "cell-ntqv"
+            },
+            "row": "row-lv7d",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "BENARES"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lv7d",
+                "cell": "cell-ntqv"
+            },
+            "row": "row-lv7d",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lv7d",
+                "cell": "cell-dp26"
+            },
+            "row": "row-lv7d",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ruler of Rampur."
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-lv7d",
+                "cell": "cell-24z6"
+            },
+            "row": "row-lv7d",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-en8a",
+                "cell": "cell-ikia"
+            },
+            "row": "row-en8a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "49"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-en8a",
+                "cell": "cell-cltk"
+            },
+            "row": "row-en8a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-en8a",
+                "cell": "cell-pky6"
+            },
+            "row": "row-en8a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\nPART II"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "align": "center"
+        }
+    },
+    {
+        "insert": "\n"
+    },
+    {
+        "insert": "\n\n\n",
+        "attributes": {
+            "table-col": {
+                "width": "100"
+            }
+        }
+    },
+    {
+        "insert": "ORISSA STATES:"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-ghnq"
+            },
+            "row": "row-55ha",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "(23)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-ghnq"
+            },
+            "row": "row-55ha",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "24",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-mnwt"
+            },
+            "row": "row-55ha",
+            "rowspan": "24",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "4"
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "24",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-mnwt"
+            },
+            "row": "row-55ha",
+            "rowspan": "24",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "24",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-x02b"
+            },
+            "row": "row-55ha",
+            "rowspan": "24",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Governor of Orissa."
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "24",
+                "colspan": "1",
+                "row": "row-55ha",
+                "cell": "cell-x02b"
+            },
+            "row": "row-55ha",
+            "rowspan": "24",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Athgarh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hefz",
+                "cell": "cell-rq78"
+            },
+            "row": "row-hefz",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Athmalik"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-2k98",
+                "cell": "cell-kzn2"
+            },
+            "row": "row-2k98",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bamra"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-5ejm",
+                "cell": "cell-srm4"
+            },
+            "row": "row-5ejm",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bhramba"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-6ajw",
+                "cell": "cell-m2o9"
+            },
+            "row": "row-6ajw",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Baudh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-wrgd",
+                "cell": "cell-pocg"
+            },
+            "row": "row-wrgd",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bonai"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-muml",
+                "cell": "cell-bnr7"
+            },
+            "row": "row-muml",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Daspalla"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-0zku",
+                "cell": "cell-3su0"
+            },
+            "row": "row-0zku",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Dhenkanal"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ji0i",
+                "cell": "cell-r7gx"
+            },
+            "row": "row-ji0i",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ganpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-16ql",
+                "cell": "cell-3kwf"
+            },
+            "row": "row-16ql",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Hindol"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-4fjv",
+                "cell": "cell-mbef"
+            },
+            "row": "row-4fjv",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Kalahandi"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-cue7",
+                "cell": "cell-rgnw"
+            },
+            "row": "row-cue7",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Keonjhar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-0lsa",
+                "cell": "cell-awrf"
+            },
+            "row": "row-0lsa",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Khandpara"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-67fl",
+                "cell": "cell-z0e1"
+            },
+            "row": "row-67fl",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Narsinghpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-6uhf",
+                "cell": "cell-za46"
+            },
+            "row": "row-6uhf",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Nayagarj"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-qu40",
+                "cell": "cell-6njw"
+            },
+            "row": "row-qu40",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Nilgiri"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hy1r",
+                "cell": "cell-db65"
+            },
+            "row": "row-hy1r",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Pal Lahara"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-4pvc",
+                "cell": "cell-2ahf"
+            },
+            "row": "row-4pvc",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Patna"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-jvb4",
+                "cell": "cell-3qqb"
+            },
+            "row": "row-jvb4",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Pairakhol"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-acoe",
+                "cell": "cell-1xv4"
+            },
+            "row": "row-acoe",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ranpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-9eim",
+                "cell": "cell-fv99"
+            },
+            "row": "row-9eim",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sonepur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-g1cp",
+                "cell": "cell-dd7o"
+            },
+            "row": "row-g1cp",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Talcher"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hzw3",
+                "cell": "cell-wu9m"
+            },
+            "row": "row-hzw3",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Tigiria"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ha6g",
+                "cell": "cell-xqr9"
+            },
+            "row": "row-ha6g",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "CENTRAL PROVINCES AND BERAR STATES:"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-5ep8"
+            },
+            "row": "row-ff7a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "(15)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-5ep8"
+            },
+            "row": "row-ff7a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "16",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-njuw"
+            },
+            "row": "row-ff7a",
+            "rowspan": "16",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "3"
+    },
+    {
+        "insert": "\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "16",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-njuw"
+            },
+            "row": "row-ff7a",
+            "rowspan": "16",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "16",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-xx7o"
+            },
+            "row": "row-ff7a",
+            "rowspan": "16",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Governor of Central Provinces and Berar."
+    },
+    {
+        "insert": "\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "16",
+                "colspan": "1",
+                "row": "row-ff7a",
+                "cell": "cell-xx7o"
+            },
+            "row": "row-ff7a",
+            "rowspan": "16",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bastar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ply9",
+                "cell": "cell-8xho"
+            },
+            "row": "row-ply9",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Changhbhakar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-wmn5",
+                "cell": "cell-9uxe"
+            },
+            "row": "row-wmn5",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Chhuikadan"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-c1mb",
+                "cell": "cell-lou1"
+            },
+            "row": "row-c1mb",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Jashpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-mf97",
+                "cell": "cell-2zyv"
+            },
+            "row": "row-mf97",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Kanker"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-yfc2",
+                "cell": "cell-w7mv"
+            },
+            "row": "row-yfc2",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Kawardha"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-on61",
+                "cell": "cell-daz5"
+            },
+            "row": "row-on61",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Khairagarh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-y15x",
+                "cell": "cell-3ili"
+            },
+            "row": "row-y15x",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Korea"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-g82u",
+                "cell": "cell-0nyy"
+            },
+            "row": "row-g82u",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Nandgaon"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-7bws",
+                "cell": "cell-y2mo"
+            },
+            "row": "row-7bws",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Raigarh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-e633",
+                "cell": "cell-9miz"
+            },
+            "row": "row-e633",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sakti"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-bt66",
+                "cell": "cell-r2vp"
+            },
+            "row": "row-bt66",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sarangarh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-5uov",
+                "cell": "cell-a1yl"
+            },
+            "row": "row-5uov",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Surguja"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-etvc",
+                "cell": "cell-httm"
+            },
+            "row": "row-etvc",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Udaipur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-5tg0",
+                "cell": "cell-qr7r"
+            },
+            "row": "row-5tg0",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Makrai"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-rj7b",
+                "cell": "cell-oc7b"
+            },
+            "row": "row-rj7b",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "MADRAS STATES:-"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-icpg",
+                "cell": "cell-9w13"
+            },
+            "row": "row-icpg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "3",
+                "colspan": "1",
+                "row": "row-icpg",
+                "cell": "cell-qnb4"
+            },
+            "row": "row-icpg",
+            "rowspan": "3",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "1"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "3",
+                "colspan": "1",
+                "row": "row-icpg",
+                "cell": "cell-qnb4"
+            },
+            "row": "row-icpg",
+            "rowspan": "3",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "3",
+                "colspan": "1",
+                "row": "row-icpg",
+                "cell": "cell-yvom"
+            },
+            "row": "row-icpg",
+            "rowspan": "3",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Governor of Madras."
+    },
+    {
+        "insert": "\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "3",
+                "colspan": "1",
+                "row": "row-icpg",
+                "cell": "cell-yvom"
+            },
+            "row": "row-icpg",
+            "rowspan": "3",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Banganapalle"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-nf7w",
+                "cell": "cell-b74y"
+            },
+            "row": "row-nf7w",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Pudukkottai"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ax1l",
+                "cell": "cell-wmrh"
+            },
+            "row": "row-ax1l",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "BOMBAY STATES: (35)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-r2cx",
+                "cell": "cell-9oat"
+            },
+            "row": "row-r2cx",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "37",
+                "colspan": "1",
+                "row": "row-r2cx",
+                "cell": "cell-mlzi"
+            },
+            "row": "row-r2cx",
+            "rowspan": "37",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "4"
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "37",
+                "colspan": "1",
+                "row": "row-r2cx",
+                "cell": "cell-mlzi"
+            },
+            "row": "row-r2cx",
+            "rowspan": "37",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "37",
+                "colspan": "1",
+                "row": "row-r2cx",
+                "cell": "cell-fb8n"
+            },
+            "row": "row-r2cx",
+            "rowspan": "37",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Governor of Bombay."
+    },
+    {
+        "insert": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "37",
+                "colspan": "1",
+                "row": "row-r2cx",
+                "cell": "cell-fb8n"
+            },
+            "row": "row-r2cx",
+            "rowspan": "37",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Rajpipla"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-p4lq",
+                "cell": "cell-5i6c"
+            },
+            "row": "row-p4lq",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Palanpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-t333",
+                "cell": "cell-1p40"
+            },
+            "row": "row-t333",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Cambay"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-sh4c",
+                "cell": "cell-9zso"
+            },
+            "row": "row-sh4c",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Dharampur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-b291",
+                "cell": "cell-vvp3"
+            },
+            "row": "row-b291",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Balasinor"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-fls0",
+                "cell": "cell-o6kx"
+            },
+            "row": "row-fls0",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Baria"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-s7ct",
+                "cell": "cell-kqy5"
+            },
+            "row": "row-s7ct",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Chhota Udepur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-t6yr",
+                "cell": "cell-1nof"
+            },
+            "row": "row-t6yr",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sant"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-bvy7",
+                "cell": "cell-vvce"
+            },
+            "row": "row-bvy7",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Lunawada"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-dyh8",
+                "cell": "cell-oy81"
+            },
+            "row": "row-dyh8",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bansda"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-vy8s",
+                "cell": "cell-3t8p"
+            },
+            "row": "row-vy8s",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sachin"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-chaf",
+                "cell": "cell-mvfz"
+            },
+            "row": "row-chaf",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Jawhar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-3zz3",
+                "cell": "cell-u6o7"
+            },
+            "row": "row-3zz3",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Danta"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-9dzx",
+                "cell": "cell-cohp"
+            },
+            "row": "row-9dzx",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Janjira"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-3ey1",
+                "cell": "cell-l2qr"
+            },
+            "row": "row-3ey1",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sangli"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-cq2t",
+                "cell": "cell-9mxz"
+            },
+            "row": "row-cq2t",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Savantvadi"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-8b6r",
+                "cell": "cell-4c6e"
+            },
+            "row": "row-8b6r",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Mudhol"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-u4na",
+                "cell": "cell-5wdp"
+            },
+            "row": "row-u4na",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Bhor"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-6tpg",
+                "cell": "cell-ahih"
+            },
+            "row": "row-6tpg",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Jamkhandi"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-vs3a",
+                "cell": "cell-g50u"
+            },
+            "row": "row-vs3a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Miraj (Sr.)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-4q10",
+                "cell": "cell-zkh1"
+            },
+            "row": "row-4q10",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Miraj (Jr.)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-opkt",
+                "cell": "cell-o7sj"
+            },
+            "row": "row-opkt",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Kurundwad (Sr.)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ahvx",
+                "cell": "cell-jn8c"
+            },
+            "row": "row-ahvx",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Kurundwad (Jr.)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-q0zk",
+                "cell": "cell-t0jc"
+            },
+            "row": "row-q0zk",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Akalkot"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-hma7",
+                "cell": "cell-433l"
+            },
+            "row": "row-hma7",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Phaltan"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-vi8j",
+                "cell": "cell-71c5"
+            },
+            "row": "row-vi8j",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Jath"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-m3e7",
+                "cell": "cell-s8i4"
+            },
+            "row": "row-m3e7",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Aundh"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ea5s",
+                "cell": "cell-l9w3"
+            },
+            "row": "row-ea5s",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Ramdrug"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-irke",
+                "cell": "cell-hg52"
+            },
+            "row": "row-irke",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Idar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-7c4v",
+                "cell": "cell-v6bc"
+            },
+            "row": "row-7c4v",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Radhanpur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-y9p0",
+                "cell": "cell-kkkk"
+            },
+            "row": "row-y9p0",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Sirohi"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ozuo",
+                "cell": "cell-ftt5"
+            },
+            "row": "row-ozuo",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Savanur"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ghr0",
+                "cell": "cell-segx"
+            },
+            "row": "row-ghr0",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Wadi"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-nm2a",
+                "cell": "cell-xnqo"
+            },
+            "row": "row-nm2a",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Vijayanagar"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-3zru",
+                "cell": "cell-g2zl"
+            },
+            "row": "row-3zru",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "Jambughoda"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-ftls",
+                "cell": "cell-exxc"
+            },
+            "row": "row-ftls",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "271 minor states, (thanas, etc.)"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-cell-line": {
+                "rowspan": "1",
+                "colspan": "1",
+                "row": "row-k4eu",
+                "cell": "cell-77ca"
+            },
+            "row": "row-k4eu",
+            "rowspan": "1",
+            "colspan": "1"
+        }
+    },
+    {
+        "insert": "\nTable of Seats appended to Part II of the First Schedul"
+    },
+    {
+        "insert": "\n",
+        "attributes": {
+            "table-col": {
+                "width": "100"
+            }
+        }
+    }
+]}

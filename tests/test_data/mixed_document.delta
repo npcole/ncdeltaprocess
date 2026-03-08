@@ -1,0 +1,22 @@
+[
+  {"insert": "Document Title"},
+  {"attributes": {"header": 1}, "insert": "\n"},
+  {"insert": "This is a "},
+  {"attributes": {"bold": true}, "insert": "rich"},
+  {"insert": " document with "},
+  {"attributes": {"italic": true}, "insert": "formatting"},
+  {"insert": ".\n"},
+  {"insert": "Section One"},
+  {"attributes": {"header": 2}, "insert": "\n"},
+  {"insert": "A bullet list:"},
+  {"insert": "\n"},
+  {"insert": "Alpha"},
+  {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "Beta"},
+  {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "\nA code example:"},
+  {"insert": "\n"},
+  {"insert": "x = 42"},
+  {"attributes": {"code-block": "python"}, "insert": "\n"},
+  {"insert": "End of document.\n"}
+]

@@ -1,0 +1,6 @@
+[
+  {"attributes": {"annotation-content": {"id": "ann-1", "type": "Annotation"}}, "insert": "This is an annotation note.\n"},
+  {"insert": "Main text with annotation"},
+  {"attributes": {"annotation-marker": {"id": "ann-1", "type": "Annotation"}}, "insert": "※"},
+  {"insert": " continues here.\n"}
+]

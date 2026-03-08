@@ -1,0 +1,7 @@
+[
+  {"insert": "Before the list\n"},
+  {"insert": "Item 1"}, {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "Item 2"}, {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "Item 3"}, {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "After the list\n"}
+]

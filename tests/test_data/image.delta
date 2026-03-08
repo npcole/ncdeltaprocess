@@ -1,0 +1,6 @@
+[
+  {"insert": "Text before image\n"},
+  {"insert": {"image": "https://example.com/photo.jpg"}},
+  {"insert": "\n"},
+  {"insert": "Text after image\n"}
+]

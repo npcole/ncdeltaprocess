@@ -1,0 +1,6 @@
+[
+  {"insert": "Heading 1"}, {"attributes": {"header": 1}, "insert": "\n"},
+  {"insert": "Heading 2"}, {"attributes": {"header": 2}, "insert": "\n"},
+  {"insert": "Heading 3"}, {"attributes": {"header": 3}, "insert": "\n"},
+  {"insert": "Normal paragraph\n"}
+]

@@ -1,0 +1,10 @@
+[
+  {"attributes": {"color": "red"}, "insert": "Red text"},
+  {"insert": " "},
+  {"attributes": {"background": "yellow"}, "insert": "Highlighted"},
+  {"insert": " "},
+  {"attributes": {"size": "large"}, "insert": "Large"},
+  {"insert": " "},
+  {"attributes": {"font": "monospace"}, "insert": "Mono"},
+  {"insert": "\n"}
+]

@@ -1,63 +1,113 @@
-# ncdeltaprocess: An Extensible Processor for Quilljs Delta Formats
+# ncdeltaprocess
 
-## About the Quilljs Delta Format
-        
-The Quilljs project invented a linar (rather than tree-based) format for document exchange, which is documented at the following
-websites:
+An extensible processor for QuillJS Delta formats, converting Delta ops into
+HTML and LaTeX output via an intermediate document tree.
 
-    - https://github.com/quilljs/delta
-    - https://quilljs.com/docs/delta/
-    
-This format can be used to both describe documents and changes to those documents.  This is a JSON-based format, designed to be
-both human-readable and easily parsable.  Each delta consists of an ordered array of operations, and when used as a document-format
-all of these operations are 'insert' operations.  These insert operations either consist of a string and (optional) related attributes
-or else an object describing some non-text-based object that should be treated by the processor as a single, atomic feature of the
-document (such as embedding a break, an image, or a video).
+## About the QuillJS Delta Format
 
-The Quilljs delta format consists of block-level elements and elements within a block.  Each block is ended with a newline character,
-and any attributes that should be applied to the whole block are, in the delta format, attached to that new-line only.
+The QuillJS project uses a linear (rather than tree-based) format for document
+exchange:
 
-Blocks are not nested within this format, but the nesting of blocks can be inferred from the attributes attached to a block.  Thus,
-in the Quilljs standard format, list-items are marked by a 'list' attribute describing the type of list (numbered or bullet) and
-an 'indent' attribute if the list is nested within another list.
+- https://github.com/quilljs/delta
+- https://quilljs.com/docs/delta/
 
-Although the Quilljs Delta format is liniar, therefore, it is capable of representing the tree-based internal format that is used
-by the Quilljs editor internally, and which is documented here:
+This JSON-based format represents documents as an ordered array of insert
+operations.  Each operation is either a string with optional formatting
+attributes, or an object describing an embedded element (image, divider, etc.).
 
-     https://github.com/quilljs/parchment
-             
-## Using the ncquilldeltaprocess Formatter
+Blocks are separated by newline characters.  Block-level attributes (headings,
+lists, alignment) are attached to the terminating newline.  Nesting is inferred
+from attributes — for example, list indent depth.
 
-The basic operation of the formatter is:
+## Installation
 
-    import ncdeltaprocess
-    t = ncdeltaprocess.Translator()
-    t.ops_to_internal_representation([
-        { 'insert': 'Gandalf', 'attributes': { 'bold': True } },
-        { 'insert': ' the ' },
-        { 'insert': 'Grey', 'attributes': { 'italic': True } },
-        { 'insert': '\n' },
-    ]).to_html()
-    
-A single-step `t.translate_to_html` combines these two steps.
+```bash
+pip install ncdeltaprocess
+
+# With LaTeX support:
+pip install ncdeltaprocess[latex]
+```
+
+## Usage
+
+```python
+from ncdeltaprocess import TranslatorQuillJS
+
+t = TranslatorQuillJS()
+
+# One-step conversion
+html = t.translate_to_html([
+    {"insert": "Gandalf", "attributes": {"bold": True}},
+    {"insert": " the "},
+    {"insert": "Grey", "attributes": {"italic": True}},
+    {"insert": "\n"},
+])
+
+# Or get the document tree for inspection
+doc = t.ops_to_internal_representation(ops)
+html = doc.render_tree()
+latex = doc.render_tree(mode='latex')
+```
+
+## Supported Formats
+
+**Block types:** paragraphs, headings (h1-h6), code blocks, blockquotes,
+ordered/bullet/checklist lists with arbitrary nesting, dividers.
+
+**Inline formatting:** bold, italic, underline, strikethrough, inline code,
+subscript, superscript, links, anchors, font family, font size, text colour,
+background colour.
+
+**Tables:** three formats supported via the module system:
+- Standard Quill 2.x tables (`table` attribute with row IDs)
+- quill-better-table (column defs + `table-cell-line` with row/cell IDs)
+- quill-table-better (style-based with headers and in-cell lists)
+
+**Annotations and footnotes:** annotation markers render inline content;
+footnote markers generate numbered references with end-matter blocks.
+
+**Output modes:** HTML (default) and LaTeX.
 
 ## Extending the Processor
 
-The Processor works by:
+The translator uses a module/plugin system.  Each module registers test
+functions (to recognise block or node types) and factory functions (to build
+the internal representation).
 
-1. De-normalizing (i.e. de-compressing) the Quilljs Delta block format.
-2. Processing each of the Delta `blocks` and their content into an internal representation of Blocks and Nodes (which, unlike the
-    Delta format itself, may be nested).
-3. Converting that tree of Blocks and Nodes into an HTML format.
-    
-The Translator object itself maintains a registery of functions that can recognize a particular type of block, and then translate the 
-Delta 'block' into the internal block type.  So, for example, the function `header_test` examines a Delta block to see if it is a header, 
-while the function `make_header_block` creates the internal representation.  The actual formatting of header blocks is controlled by the 
-`ncdeltaprocess.block.TextBlockHeading` class.  
+```python
+from ncdeltaprocess.modules import ModuleBase
 
-Nodes within each block likewise have formatters that are responsible for converting them to html, and the translator class 
-mantains a registry of tests and formatters for nodes that is the equivilent of the one for blocks.
+class MyModule(ModuleBase):
+    block_registry = {
+        'my_test': 'my_factory',
+    }
 
-Every internal representation also has a single QDocument object that serves as the root of the tree.  Currently the functionality is
-limited, but this also provides an opportunity for extension.
+    def my_test(self, qblock, this_document, previous_block):
+        return 'my-attribute' in qblock['attributes']
 
+    def my_factory(self, qblock, this_document, previous_block):
+        # Build and return a Block node
+        ...
+
+t = TranslatorQuillJS()
+t.add_module(MyModule)
+```
+
+Built-in modules: `ListModule`, `AnnotationModule`, `DividerModule`,
+`TableQuill2Module`, `BetterTableModule`, `TableBetterModule`.
+
+## Security
+
+All user-controlled values are sanitised before inclusion in output:
+
+- **HTML:** text is entity-escaped; URLs are checked against a blocked-scheme
+  list (`javascript:`, `vbscript:`, `data:` in link contexts); CSS values are
+  validated against a safe-character whitelist; `data:` URIs are permitted in
+  `<img src>` where they are safe.
+- **LaTeX:** URLs are encoded for safe use in `\href`; labels are sanitised
+  for `\hyperlink`/`\hypertarget`; text content is escaped via
+  `unicode_to_latex`.
+
+## License
+
+BSD

@@ -1,0 +1,9 @@
+[
+  {"insert": "Left aligned\n"},
+  {"insert": "Center aligned"},
+  {"attributes": {"align": "center"}, "insert": "\n"},
+  {"insert": "Right aligned"},
+  {"attributes": {"align": "right"}, "insert": "\n"},
+  {"insert": "Justified text"},
+  {"attributes": {"align": "justify"}, "insert": "\n"}
+]

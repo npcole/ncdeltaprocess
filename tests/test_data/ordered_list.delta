@@ -1,0 +1,5 @@
+[
+  {"insert": "First"}, {"attributes": {"list": "ordered"}, "insert": "\n"},
+  {"insert": "Second"}, {"attributes": {"list": "ordered"}, "insert": "\n"},
+  {"insert": "Third"}, {"attributes": {"list": "ordered"}, "insert": "\n"}
+]

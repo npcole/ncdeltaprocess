@@ -1,0 +1,14 @@
+[
+  {"insert": "\n", "attributes": {"table-col": {"width": "200"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "200"}}},
+  {"insert": "First paragraph"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1a"}, "row": "row-1"}},
+  {"insert": "Second paragraph"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1a"}, "row": "row-1"}},
+  {"insert": "Single cell"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1b"}, "row": "row-1"}},
+  {"insert": "Row 2 left"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-2", "cell": "cell-2a"}, "row": "row-2"}},
+  {"insert": "Row 2 right"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-2", "cell": "cell-2b"}, "row": "row-2"}}
+]

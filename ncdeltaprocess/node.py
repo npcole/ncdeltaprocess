@@ -1,147 +1,149 @@
-import urllib.parse
-import bleach
-from .render import *
+"""Inline node classes for the document tree."""
+
+from __future__ import annotations
+
+import html as _html
+from typing import Any
+from .render import RenderMixin, OutputObject
+from .sanitize import sanitize_url, sanitize_latex_url
+from .document import QDocument
+from .html_line_render import LineRenderHTML
+from .latex_line_render import LineRenderLaTeX
 
 
 __all__ = [
-    'Node', 'TextLine', 'Image'
+    'Node', 'TextLine', 'Image', 'DividerNode',
+    'AnnotationMarkerNode', 'FootnoteMarkerNode',
 ]
 
 
 class Node(object):
-    is_leaf = True
-    def __init__(self, contents, attributes=None, parent=None, previous_node=None):
+    is_leaf: bool = True
+
+    def __init__(
+        self,
+        contents: str | dict[str, Any],
+        attributes: dict[str, Any] | None = None,
+        parent: Any = None,
+        previous_node: Node | None = None,
+    ) -> None:
         self.contents = contents
-        self.attributes = attributes or {}
-        self.parent=None
+        self.attributes: dict[str, Any] = attributes or {}
+        self.parent = parent
         self.previous_node = previous_node
 
-class TextLine(RenderMixin, Node):
-    # NB at some point sanitization needs to be done.
-    # https:/\nypi.org\nroject/html-sanitizer/ for the whole document
-    # or use bleach for each element.
-    
-    standard_inline_styles = {
-        'italic': ('<em>', '</em>'),
-        'bold': ('<strong>', '</strong>'),
-        'strike': ('<s>', '</s>'),
-    }
+    def find_document(self) -> QDocument:
+        if not self.parent:
+            raise ValueError("No parent for node")
+        this_parent = self.parent
+        while True:
+            if isinstance(this_parent, QDocument):
+                break
+            if not this_parent:
+                raise ValueError("Cannot find document")
+            this_parent = this_parent.parent
+        return this_parent
 
-    script_styles = {
-        'sub': ('<sub>', '</sub>'),
-        'super': ('<super>', '<super>')
-    }
-    
-    css_font_size = {
-        'small': 'small',
-        # normal won't show up
-        'large': 'large',
-        'huge': 'x-large'
-    }
-    
-    allowed_fonts = {
-        'monospace': 'monospace, monospace',
-        'serif': 'serif',
-        # sans is default
-    }
-    
-    text_span_css = [
-        # quilljs attribute, css_attribute, translator
-        ('size', 'font-size', 'css_font_size'), 
-        ('font', 'font-family', 'allowed_fonts'),
-        ('color', 'color', None),
-        ('background', 'background-color', None)
-    ]
-    
-    quill_diff_translator = {
-        'insert': 'quill-diff-insert',
-        'delete': 'quill-diff-delete',
-    }
-    
-    css_classes = [
-        # Attibute name, value translating dict. 
-        ('quill_diff', 'quill_diff_translator')
-    ]
-    
-    def __init__(self, strip_newline=False, *args, **keywords):
+
+class TextLine(RenderMixin, Node):
+    HTML_RENDER_CLASS: type[LineRenderHTML] = LineRenderHTML
+    LATEX_RENDER_CLASS: type[LineRenderLaTeX] = LineRenderLaTeX
+
+    def __init__(self, strip_newline: bool = False, *args: Any, **keywords: Any) -> None:
         super(TextLine, self).__init__(*args, **keywords)
         if strip_newline and self.contents.endswith("\n"):
             self.contents = self.contents[:-1]
-        
-    def pre_process_line(self, line):
-        # this could be a place to do sanitization
-        # or to add additional line breaks
-        
-        line = bleach.clean(line)
-        
-        return line
-    
-    def process_line_with_attributes(self, text_string):
-        output = text_string
-        for this_i in self.standard_inline_styles.keys():
-            if this_i in self.attributes and self.attributes[this_i]:
-                output = self.standard_inline_styles[this_i][0] + output + self.standard_inline_styles[this_i][1]
-        
-        for this_s in self.script_styles.keys():
-            if 'script' in self.attributes and self.attributes['script'] == this_s:
-                output = self.script_styles[this_s][0] + output + self.script_styles[this_s][1]
-        
-        css_styles = []
-        for this_test in self.text_span_css:
-            qflag, css_attribute, translator = this_test
-            if qflag in self.attributes:
-                if not translator:
-                    css_styles.append(f"{css_attribute}: {self.attributes[qflag]}")
-                else:
-                    translated = getattr(self, translator).get(self.attributes[qflag], None)
-                    if translated:
-                        css_styles.append(f"{css_attribute}: {translated}")
-                    else:
-                        continue
-        
-        these_css_classes = []
-        for this_test in self.css_classes:
-            qflag, translator = this_test
-            if qflag in self.attributes:
-                translated = getattr(self, translator).get(self.attributes[qflag], None)
-                if translated:
-                    these_css_classes.append(f"{css_attribute}: {translated}")
-                
-        
-        if css_styles:
-            css_styles_string = ';'.join(css_styles)
-            output = f'<span style="{css_styles_string}">{output}</span>'
-        
-        if these_css_classes:
-            css_classes_string = ' '.join(these_css_classes)
-            output = f'<span class="{css_classes_string}">{output}</span>'
-        
-        if 'link' in self.attributes:
-            # Warning ... this needs to be carefully sanitized
-            link = urllib.parse.quote(self.attributes['link'])
-            output = f'<a href="{link}"{output}></a>'
-        # should add colour and background colour here.
-        return output
-        
-    
-    def render_contents_html(self):
-        # For now treat each inline block atomically. A refinement will be to
-        # Look at the previous node, close any tags that should no longer be open
-        # and open any new ones.
-        
-        # The way these functions are broken up would allow extensions to treat linebreaks sensibly, for example.
-        # The quilljs project deltas refuse to do this.
-        output = self.pre_process_line(self.contents)
-        output = self.process_line_with_attributes(output)
-        # should add colour and background colour here.
-        return output
-            
+        self.html_renderer: LineRenderHTML = self.HTML_RENDER_CLASS(self)
+        self.latex_renderer: LineRenderLaTeX = self.LATEX_RENDER_CLASS(self)
+
+    def render_contents_html(self, output: OutputObject) -> str:
+        result = self.html_renderer.pre_process_line(self.contents)
+        result = self.html_renderer.process_line_with_attributes(result)
+        return result
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        return self.latex_renderer.process_line_with_attributes(self.contents)
+
+
 class Image(RenderMixin, Node):
-    def render_contents_html(self):
-        output = '<img src="%s">' % self.contents['image']
+    def render_contents_html(self, output: OutputObject) -> str:
+        src = sanitize_url(self.contents['image'], allow_data=True)
+        result = '<img src="%s">' % src
         if 'link' in self.attributes:
-            # Warning ... this needs to be carefully sanitized
-            link = urllib.parse.quote(self.attributes['link'])
-            output = '<a href="%s">' % link + output + '</a>'
-        return output
-        
+            link = sanitize_url(self.attributes['link'])
+            if link:
+                result = '<a href="%s">' % link + result + '</a>'
+        return result
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        src = self.contents['image']
+        if src.startswith('data:'):
+            # Data URIs can't be embedded in LaTeX directly
+            result = r'\fbox{\textit{[embedded image]}}'
+        else:
+            result = r'\includegraphics[max width=\textwidth]{%s}' % sanitize_latex_url(src)
+        if 'link' in self.attributes:
+            result = r'\href{%s}{%s}' % (sanitize_latex_url(self.attributes['link']), result)
+        return result
+
+
+class DividerNode(RenderMixin, Node):
+    """Renders a thematic break / horizontal rule."""
+
+    def render_contents_html(self, output: OutputObject) -> str:
+        return '<hr />'
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        return r'\noindent\rule{\textwidth}{0.4pt}'
+
+
+class AnnotationMarkerNode(RenderMixin, Node):
+    """Renders an annotation marker — content shown inline."""
+
+    def _get_annotation_block(self) -> 'Block':
+        """Look up the paired annotation content block, or raise."""
+        this_id = self.attributes['annotation-marker']['id']
+        doc = self.find_document()
+        if this_id not in doc.block_index:
+            raise KeyError(
+                f"Annotation content block not found for marker id '{this_id}'"
+            )
+        return doc.block_index[this_id]
+
+    def render_contents_html(self, output: OutputObject) -> str:
+        an_block = self._get_annotation_block()
+        return '<span class="annotation"><span class="annotation-content">' + an_block.render_tree() + '</span></span>'
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        an_block = self._get_annotation_block()
+        return r'\marginpar{' + an_block.render_tree(mode='latex') + '}'
+
+
+class FootnoteMarkerNode(RenderMixin, Node):
+    """Renders a footnote marker — numbered reference with end-matter content."""
+
+    def _get_annotation_block(self) -> 'Block':
+        """Look up the paired annotation content block, or raise."""
+        this_id = self.attributes['annotation-marker']['id']
+        doc = self.find_document()
+        if this_id not in doc.block_index:
+            raise KeyError(
+                f"Footnote content block not found for marker id '{this_id}'"
+            )
+        return doc.block_index[this_id]
+
+    def render_contents_html(self, output: OutputObject) -> str:
+        output.fn_count += 1
+        this_id = _html.escape(self.attributes['annotation-marker']['id'], quote=True)
+        an_block = self._get_annotation_block()
+        output.end_matter.append(
+            f'<div class="footnote-block"><span id="fn-{this_id}" class="footnote-number">'
+            f'[{output.fn_count}]</span> '
+            + an_block.render_tree()
+            + '</div>'
+        )
+        return f'<span class="footnote-marker"><a href="#fn-{this_id}">[{output.fn_count}]</a></span>'
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        an_block = self._get_annotation_block()
+        return r'\footnote{' + an_block.render_tree(mode='latex') + '}'

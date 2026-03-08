@@ -1,0 +1,7 @@
+[
+  {"insert": "def hello():"},
+  {"attributes": {"code-block": "python"}, "insert": "\n"},
+  {"insert": "    print('hello')"},
+  {"attributes": {"code-block": "python"}, "insert": "\n"},
+  {"insert": "Normal text after code\n"}
+]

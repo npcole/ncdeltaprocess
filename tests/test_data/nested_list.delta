@@ -1,0 +1,15 @@
+[
+  {"insert": "Fruit"}, {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "Apple"}, {"attributes": {"indent": 1, "list": "bullet"}, "insert": "\n"},
+  {"insert": "Granny Smith"}, {"attributes": {"indent": 2, "list": "bullet"}, "insert": "\n"},
+  {"insert": "Fuji"}, {"attributes": {"indent": 2, "list": "bullet"}, "insert": "\n"},
+  {"insert": "Banana"}, {"attributes": {"indent": 1, "list": "bullet"}, "insert": "\n"},
+  {"insert": "Vegetables"}, {"attributes": {"list": "bullet"}, "insert": "\n"},
+  {"insert": "Steps"}, {"attributes": {"list": "ordered"}, "insert": "\n"},
+  {"insert": "First"}, {"attributes": {"indent": 1, "list": "ordered"}, "insert": "\n"},
+  {"insert": "Second"}, {"attributes": {"indent": 1, "list": "ordered"}, "insert": "\n"},
+  {"insert": "Detail"}, {"attributes": {"indent": 2, "list": "bullet"}, "insert": "\n"},
+  {"insert": "Third"}, {"attributes": {"indent": 1, "list": "ordered"}, "insert": "\n"},
+  {"insert": "Buy milk"}, {"attributes": {"list": "checked"}, "insert": "\n"},
+  {"insert": "Buy eggs"}, {"attributes": {"list": "unchecked"}, "insert": "\n"}
+]

@@ -1,0 +1,9 @@
+[
+  {"insert": "Visit "},
+  {"attributes": {"link": "https://example.com"}, "insert": "Example"},
+  {"insert": " or go to "},
+  {"attributes": {"link": "#section2"}, "insert": "Section 2"},
+  {"insert": "\n"},
+  {"attributes": {"anchor": "section2"}, "insert": "Section 2 content"},
+  {"insert": "\n"}
+]

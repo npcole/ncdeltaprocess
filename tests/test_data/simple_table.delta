@@ -1,0 +1,6 @@
+[
+  {"insert": "1"}, {"attributes": {"table": "row-1"}, "insert": "\n"},
+  {"insert": "2"}, {"attributes": {"table": "row-1"}, "insert": "\n"},
+  {"insert": "3"}, {"attributes": {"table": "row-2"}, "insert": "\n"},
+  {"insert": "4"}, {"attributes": {"table": "row-2"}, "insert": "\n"}
+]

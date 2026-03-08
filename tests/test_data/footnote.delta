@@ -1,0 +1,9 @@
+[
+  {"attributes": {"annotation-content": {"id": "fn-1", "type": "Footnote"}}, "insert": "Smith, 2024, p. 42.\n"},
+  {"attributes": {"annotation-content": {"id": "fn-2", "type": "Footnote"}}, "insert": "Jones, 2023, p. 17.\n"},
+  {"insert": "First claim"},
+  {"attributes": {"annotation-marker": {"id": "fn-1", "type": "Footnote"}}, "insert": "※"},
+  {"insert": " and second claim"},
+  {"attributes": {"annotation-marker": {"id": "fn-2", "type": "Footnote"}}, "insert": "※"},
+  {"insert": ".\n"}
+]

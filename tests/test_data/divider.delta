@@ -1,0 +1,5 @@
+[
+  {"insert": "Above the line\n"},
+  {"insert": {"divider": true}},
+  {"insert": "Below the line\n"}
+]

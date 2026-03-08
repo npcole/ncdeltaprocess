@@ -1,0 +1,15 @@
+[
+  {"insert": "\n", "attributes": {"table-col": {"width": "100"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "100"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "100"}}},
+  {"insert": "Spanning header"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "2", "row": "row-1", "cell": "cell-1a"}, "row": "row-1"}},
+  {"insert": "Right"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1c"}, "row": "row-1"}},
+  {"insert": "A"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-2", "cell": "cell-2a"}, "row": "row-2"}},
+  {"insert": "B"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-2", "cell": "cell-2b"}, "row": "row-2"}},
+  {"insert": "C"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-2", "cell": "cell-2c"}, "row": "row-2"}}
+]

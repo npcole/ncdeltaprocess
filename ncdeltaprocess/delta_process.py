@@ -1,105 +1,209 @@
-from .document import *
-from . import block 
+"""Translator classes for converting Quill Delta ops into a document tree."""
+
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
+from .document import QDocument
 from . import block as bks
 from . import node
+from .modules.annotations import AnnotationModule
+from .modules.divider import DividerModule
+from .modules.lists import ListModule
+from .modules.table_quill2 import TableQuill2Module
+from .modules.table_better_table import BetterTableModule
+import warnings
+import copy
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from .modules import ModuleBase
 
 __all__ = ['TranslatorBase', 'TranslatorQuillJS']
 
+# Type alias for a single Quill Delta operation dict.
+DeltaOp = dict[str, Any]
+
+
 class TranslatorBase(object):
-    """This is a base class for Delta formats."""
-    def __init__(self):
-        self.block_registry = {
-            # text blocks will be handled by default
+    """Base class for Delta format translators.
+
+    Provides a module/plugin system, block and node registries, and the core
+    ``ops_to_internal_representation`` method that converts Quill Delta ops
+    into a QDocument tree.
+    """
+    def __init__(self, diff_mode: bool = False) -> None:
+        self.DIFF_MODE: bool = diff_mode
+        self._modules: list[ModuleBase] = []
+        self.block_registry: dict[Any, Any] = {}
+        self.node_registry: dict[Any, Any] = {}
+        self.settings: dict[str, Any] = {
+            'list_text_blocks_are_p': True,
+            'list_better_table_cells_are_p': True,
         }
-        
-        self.node_registry = {
-            #self.string_node_test: self.make_string_node, # we will make the string the default
-        }
-        
-        self.settings = {
-            'list_text_blocks_are_p': True
-        }
-    
-    def translate_to_html(self, delta_ops):
-        return self.ops_to_internal_representation(delta_ops).render_html()
-    
-    def ops_to_internal_representation(self, delta_ops):
+
+    def add_module(self, module_class: type[ModuleBase]) -> None:
+        """Register a module that provides additional block/node handlers."""
+        module = module_class(parent=self)
+        self._modules.append(module)
+        self.settings.update(module.settings)
+        for reg in ('block_registry', 'node_registry'):
+            module_registry = getattr(module, reg)
+            my_registry = getattr(self, reg)
+            for kn, vln in module_registry.items():
+                if isinstance(kn, str):
+                    if not hasattr(module, kn):
+                        raise AttributeError(
+                            f"{module_class.__name__}.{reg} references "
+                            f"missing test method '{kn}'"
+                        )
+                    ky = getattr(module, kn)
+                else:
+                    ky = kn
+                if isinstance(vln, str):
+                    if not hasattr(module, vln):
+                        raise AttributeError(
+                            f"{module_class.__name__}.{reg} references "
+                            f"missing factory method '{vln}'"
+                        )
+                    vl = getattr(module, vln)
+                else:
+                    vl = vln
+                my_registry[ky] = vl
+
+    def translate_to_html(self, delta_ops: list[DeltaOp]) -> str:
+        return self.ops_to_internal_representation(delta_ops).render_tree()
+
+    def translate_to_latex(self, delta_ops: list[DeltaOp]) -> str:
+        return self.ops_to_internal_representation(delta_ops).render_tree(mode='latex')
+
+    def ops_to_internal_representation(
+        self,
+        delta_ops: list[DeltaOp],
+        ensure_final_block: bool = True,
+        recopy: bool = True,
+        debug: bool = False,
+    ) -> QDocument:
+        """Convert Quill Delta ops into a QDocument tree.
+
+        Args:
+            delta_ops: List of Quill Delta operation dicts.
+            ensure_final_block: If True, append a trailing newline when the
+                ops don't end with one, so the last block is yielded.
+            recopy: If True, deep-copy delta_ops to avoid mutating the caller's data.
+            debug: If True, print diagnostic information during processing.
+        """
+        if recopy:
+            delta_ops = copy.deepcopy(delta_ops)
+        if ensure_final_block and (
+                not delta_ops
+                or not ('insert' in delta_ops[-1]
+                        and isinstance(delta_ops[-1]['insert'], str)
+                        and delta_ops[-1]['insert']
+                        and delta_ops[-1]['insert'][-1] == '\n')
+        ):
+            delta_ops.append({'insert': '\n'})
+
         this_document = QDocument()
-        previous_block = None
+        previous_block: bks.Block | None = None
         for qblock in self.yield_blocks(delta_ops):
-            # first do the block
+            # Match against registered block handlers
             arguments = (qblock, this_document, previous_block)
-            matched_tests = tuple(test for test in self.block_registry.keys() if test(*arguments))
+            matched_tests = tuple(
+                test for test in self.block_registry.keys() if test(*arguments)
+            )
             if len(matched_tests) == 1:
+                if debug:
+                    print(f"\n + Matched test: {matched_tests[0]} - {arguments}")
                 this_block = self.block_registry[matched_tests[0]](*arguments)
             elif len(matched_tests) > 1:
-                raise ValueError("More than one test matched")
+                raise ValueError(
+                    f"More than one block test matched: "
+                    f"{[t.__name__ for t in matched_tests]} for {qblock}"
+                )
             else:
-                # assume it is a standard text block
+                if self.DIFF_MODE and ''.join(
+                    s['insert'] for s in qblock['contents']
+                ) in ('', '\n'):
+                    if debug:
+                        print("DIFF MODE - Skipping blank block")
+                    continue
+                if debug:
+                    print(f" - No test matched for {arguments}.")
                 this_block = self.make_standard_text_block(*arguments)
             previous_block = this_block
-            
-            # now do the nodes
+
+            # Process inline nodes within the block
             for this_content in qblock['contents']:
-                node_arguments = {'block': this_block, 'contents': this_content['insert'], 'attributes': this_content.get('attributes', {}).copy()}
-                node_matched_tests = tuple(test for test in self.node_registry.keys() if test(**node_arguments))
+                node_arguments: dict[str, Any] = {
+                    'block': this_block,
+                    'contents': this_content['insert'],
+                    'attributes': this_content.get('attributes', {}).copy(),
+                }
+                node_matched_tests = tuple(
+                    test for test in self.node_registry.keys()
+                    if test(**node_arguments)
+                )
                 if len(node_matched_tests) == 1:
                     previous_node = self.node_registry[node_matched_tests[0]](**node_arguments)
                 elif len(node_matched_tests) > 1:
-                    raise ValueError("More than one test matched.")
+                    raise ValueError(
+                        f"More than one node test matched: "
+                        f"{[t.__name__ for t in node_matched_tests]} for {this_content}"
+                    )
                 else:
                     if isinstance(this_content['insert'], str):
                         previous_node = self.make_string_node(**node_arguments)
+                    elif this_content['insert'] is None:
+                        warnings.warn(f'Skipping node with None insert: {this_content}')
+                        continue
                     else:
-                        raise ValueError("I don't know how to add this node. Default string handler failed. Node contents is %s" % node_arguments['contents'])
-                ## The following line allows custom node creators to split a block in two if necessary -- for example
-                ## a custom node adding a horizonal rule might do so.
+                        raise ValueError(
+                            "I don't know how to add this node. Default string "
+                            "handler failed. Node contents is %s" % node_arguments['contents']
+                        )
+                # Allow custom node creators to reparent (e.g. divider splitting a block)
                 this_block = previous_node.parent
         return this_document
-      
-    def is_block(self, insert_instruction):
-        return False # For extension later. Currently assumed that blocks are only marked by \n
- 
-    
-    def yield_blocks(self, delta_ops):
-        """Yields each block-level chunk, though without nesting blocks, which will be the responsibility of another function.
-        Has the effect of de-normalizing Quilljs's compact representation.
-    
-        Blocks are yielded as a dictionary, consisting of
-        {'contents': [...] # a list of dictionaries containing the nodes for the block.
-         'attributes': {}  # a dictionary containing the attributes for the block
-        }
+
+    def is_block(self, insert_instruction: Any) -> bool:
+        """Return True if this non-string insert is a block-level embed."""
+        return any(m.is_block_embed(insert_instruction) for m in self._modules)
+
+    @staticmethod
+    def _copy_block_attrs(source: DeltaOp, target: dict[str, Any]) -> None:
+        """Copy block-level attributes from a source instruction to a target dict."""
+        if 'attributes' in source:
+            target['attributes'] = source['attributes']
+
+    def yield_blocks(self, delta_ops: list[DeltaOp]) -> Generator[dict[str, Any]]:
+        """Yield each block-level chunk from raw Delta ops.
+
+        Splits on newline characters to de-normalize Quill's compact format.
+        Each yielded block is a dict with 'contents' (list of node dicts)
+        and 'attributes' (block-level attributes from the newline op).
         """
-        block_marker = '\n' # currently assumed that there is one, and one only type of block marker.
-        raw_blocks = []
-        temporary_nodes = [] # the block marker comes at the end of the block, so we may not have one yet.
-        block_keys = ['attributes']
-        for counter, instruction in enumerate(delta_ops):
+        block_marker = '\n'
+        temporary_nodes: list[DeltaOp] = []
+        for instruction in delta_ops:
             if 'insert' not in instruction:
-                raise ValueError("This parser can only deal with documents.")
+                raise ValueError(
+                    f"This parser can only deal with documents. "
+                    f"Instruction was: {instruction}."
+                )
             insert_instruction = instruction['insert']
             if isinstance(insert_instruction, str):
-                if not 'attributes' in instruction:
+                if 'attributes' not in instruction:
                     instruction['attributes'] = {}
-                block_attributes = instruction['attributes']
-                #if insert_instruction.endswith(block_marker):
-                #    # then we have complete blocks.  
-                #    last_node_completes_block = True
-                #else:
-                #    last_node_completes_block = False
                 if block_marker not in insert_instruction:
                     temporary_nodes.append(instruction)
                 elif insert_instruction == block_marker:
-                    # put the newline on the end of the last instruction, just in case we need it
-                    if not 'attributes' in instruction:
-                        instruction['attributes'] = {}
                     block_attributes = instruction['attributes']
-                    temporary_nodes.append({"insert": "\n", "attributes": block_attributes.copy()})
-                    yield_this =  {'contents': temporary_nodes[:],}
-                    for k in instruction.keys():
-                        if k in block_keys:
-                            yield_this[k] = instruction[k]
-                        temporary_nodes = []
+                    temporary_nodes.append(
+                        {"insert": "\n", "attributes": block_attributes.copy()}
+                    )
+                    yield_this: dict[str, Any] = {'contents': temporary_nodes[:]}
+                    self._copy_block_attrs(instruction, yield_this)
+                    temporary_nodes = []
                     yield yield_this
                 else:
                     sub_blocks = insert_instruction.split(block_marker)
@@ -110,296 +214,152 @@ class TranslatorBase(object):
                     else:
                         last_node_completes_block = False
                     for this_c, contents in enumerate(sub_blocks):
-                        if last_node_completes_block or this_c < sub_blocks_len-1:
-                            temporary_nodes.append({'insert': contents})
-                            for k in instruction.keys():
-                                if k in block_keys:
-                                    temporary_nodes[-1][k] = instruction[k]
+                        if last_node_completes_block or this_c < sub_blocks_len - 1:
+                            new_node: DeltaOp = {'insert': contents}
+                            self._copy_block_attrs(instruction, new_node)
+                            temporary_nodes.append(new_node)
                             yield_this = {'contents': temporary_nodes[:]}
                             temporary_nodes = []
-                            for k in instruction.keys():
-                                if k in block_keys:
-                                    yield_this[k] = instruction[k]
+                            self._copy_block_attrs(instruction, yield_this)
                             yield yield_this
                         else:
-                            # on the last part of an insert statement but not a complete block
-                            temporary_nodes.append({'insert': contents})
-                            for k in instruction.keys():
-                                if k in block_keys:
-                                    temporary_nodes[-1][k] = instruction[k]
+                            new_node = {'insert': contents}
+                            self._copy_block_attrs(instruction, new_node)
+                            temporary_nodes.append(new_node)
             else:
                 if not self.is_block(insert_instruction):
                     temporary_nodes.append(instruction)
                 else:
-                    yield(instruction)
-    
-    def make_standard_text_block(self, qblock, this_document, previous_block):
-        this_block = this_document.add_block(
-            block.TextBlockParagraph(parent=this_document, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy())
+                    # Flush pending inline nodes before yielding a block embed
+                    if temporary_nodes:
+                        yield {'contents': temporary_nodes[:], 'attributes': {}}
+                        temporary_nodes = []
+                    yield {'contents': [instruction], 'attributes': {}}
+
+    def make_standard_text_block(
+        self,
+        qblock: dict[str, Any],
+        this_document: QDocument,
+        previous_block: bks.Block | None,
+    ) -> bks.Block:
+        return this_document.add_block(
+            bks.TextBlockParagraph(
+                parent=this_document,
+                last_block=previous_block,
+                attributes=qblock['attributes'].copy(),
             )
-        return this_block
-    
-    def make_string_node(self, block, contents, attributes):
+        )
+
+    def make_string_node(
+        self,
+        block: bks.Block,
+        contents: str,
+        attributes: dict[str, Any],
+    ) -> node.Node:
         if isinstance(block, bks.TextBlockCode):
-            return block.add_node(node.TextLine(contents=contents, attributes=attributes, strip_newline=False))
+            return block.add_node(
+                node.TextLine(contents=contents, attributes=attributes, strip_newline=False)
+            )
         else:
-            return block.add_node(node.TextLine(contents=contents, attributes=attributes, strip_newline=True))
-        
-    
-    
-    
+            return block.add_node(
+                node.TextLine(contents=contents, attributes=attributes, strip_newline=True)
+            )
+
+
 class TranslatorQuillJS(TranslatorBase):
-    """This class converts structures found in the QuillJS flavour of Delta formats."""
-    def __init__(self):
-        super(TranslatorQuillJS, self).__init__()
+    """Translator for the QuillJS flavour of Delta formats."""
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
         self.block_registry.update({
             self.header_test: self.make_header_block,
-            self.list_test: self.make_list_block,
-            self.better_table_test: self.make_better_table_blocks,
-            self.table_cell_test: self.make_table_cell_block,
             self.code_block_test: self.make_code_block,
-            # text blocks will be handled by default
         })
-        
+
         self.node_registry.update({
-            #self.string_node_test: self.make_string_node, # we will make the string the default
             self.image_node_test: self.make_image_node,
         })
-        
-        
-    
-    ##### Test functions and node/block creators follow #####
-    
-    def header_test(self, qblock, this_document, previous_block):
-        if 'header' in qblock['attributes']:
-            return True
-        else:
-            return False
-        
-    def list_test(self, qblock, this_document, previous_block):
-        if 'list' in qblock['attributes']:
-            return True
-        else:
-            return False
-    
-    def better_table_test(self, qblock, this_document, previous_block):
-        if qblock['attributes']:
-            if qblock['attributes'].get('table-col', False) or qblock['attributes'].get('table-cell-line', False):
-                return True
-            else:
-                return False
-        return False
-    
-    def table_cell_test(self, qblock, this_document, previous_block):
-        if qblock['attributes']:
-            return qblock['attributes'].get('table', False)
-    
-    def code_block_test(self, qblock, this_document, previous_block):
-        if 'code-block' in qblock['attributes']:
-            return True
-        else:
-            return False
-    
-    def make_header_block(self, qblock, this_document, previous_block):
-        this_block = this_document.add_block(
-            block.TextBlockHeading(
-                parent=this_document, last_block=previous_block, attributes=qblock['attributes'].copy()
-                )
+
+        self.add_module(ListModule)
+        self.add_module(AnnotationModule)
+        self.add_module(DividerModule)
+        self.add_module(TableQuill2Module)
+        self.add_module(BetterTableModule)
+
+    # ---- Block test functions ----
+
+    def header_test(
+        self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
+    ) -> bool:
+        return ('header' in qblock['attributes']
+                and qblock['attributes']['header'] is not None)
+
+    def code_block_test(
+        self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
+    ) -> bool:
+        return 'code-block' in qblock['attributes']
+
+    # ---- Node test functions ----
+
+    def image_node_test(
+        self, block: bks.Block, contents: Any, attributes: dict[str, Any],
+    ) -> bool:
+        return isinstance(contents, dict) and 'image' in contents
+
+    # ---- Block creators ----
+
+    def make_header_block(
+        self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
+    ) -> bks.Block:
+        return this_document.add_block(
+            bks.TextBlockHeading(
+                parent=this_document,
+                last_block=previous_block,
+                attributes=qblock['attributes'].copy(),
+            )
         )
-        return this_block
-    
-    def make_code_block(self, qblock, this_document, previous_block):
-        # should we be adding the contents of this block to a previous
-        # textblock if there is one?
-        # if so, we probably just want to return the previous block, so that the text can be added into it.
-        if isinstance(previous_block, block.TextBlockCode) and \
-        previous_block.attributes == qblock['attributes']: # relying on standard python mapping comparison.
+
+    def make_code_block(
+        self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
+    ) -> bks.Block:
+        # Merge consecutive code blocks with the same attributes
+        if (isinstance(previous_block, bks.TextBlockCode)
+                and previous_block.attributes == qblock['attributes']):
             return previous_block
-        
-        this_block = this_document.add_block(
-            block.TextBlockCode(
-                parent=this_document, last_block=previous_block, attributes=qblock['attributes'].copy()
+
+        return this_document.add_block(
+            bks.TextBlockCode(
+                parent=this_document,
+                last_block=previous_block,
+                attributes=qblock['attributes'].copy(),
             )
         )
-        return this_block
-    
-    def make_standard_text_block(self, qblock, this_document, previous_block):
-        this_block = this_document.add_block(
-            block.TextBlockParagraph(parent=this_document, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy()
-                )
-            )
-        return this_block
-    
-    def make_list_block(self, qblock, this_document, previous_block):
-        container_block = None
-        required_depth = qblock['attributes'].get('indent', 0)
-        
-        # see if the previous block was part of a list
-        lb_parents = [p for p in list(previous_block.get_parents()) if isinstance(p, block.ListItemBlock)]
-        if lb_parents and lb_parents[0].attributes.get('indent', 0) == required_depth:
-            # prefect, we can use this
-            container_block = previous_block.parent
-        elif lb_parents and lb_parents[0].attributes.get('indent', 0) < required_depth:
-            # we are part of a list, but it isn't deep enough
-            container_block = lb_parents[0]
-            while required_depth > container_block.attributes.get('indent', 0):
-                current_depth = container_block.attributes.get('indent', 0)
-                if isinstance(container_block, block.ListBlock):
-                    container_block = container_block.add_block(
-                        block.ListItemBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                        )
-                    container_block.attributes['indent'] = current_depth + 1
-                container_block = container_block.add_block(
-                    block.ListBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                    )
-                container_block.attributes['indent'] = current_depth + 1
-        else:
-            # see if there is a parent list item that we can latch on to.
-            container_block = None
-            for candidate_block in lb_parents:
-                if candidate_block.attributes.get('indent', 0) == required_depth:
-                    container_block = candidate_block
-                    break
-            else:
-                # perhaps the previous paragraph has the depth we need - but don't use it for a depth of 0 -- use the root document instead.
-                if required_depth > 0 and previous_block.attributes.get('indent', 0) == required_depth:
-                    container_block = previous_block.add_block(
-                        block.ListBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                        )
-                else:
-                    # Bail out and put it on the root document, building up to the depth needed.
-                    container_block = this_document.add_block(
-                        block.ListBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                        )
-                    
-                    while required_depth > container_block.attributes.get('indent', 0):
-                        current_depth = container_block.attributes.get('indent', 0)
-                        if isinstance(container_block, block.ListBlock):
-                            container_block = container_block.add_block(
-                                block.ListItemBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                                )
-                            container_block.attributes['indent'] = current_depth + 1
-                        container_block = container_block.add_block(
-                            block.ListBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-                            )
-                        container_block.attributes['indent'] = current_depth + 1
-                        
-        # finally, we should have a list block to add our current block to:
-        # It should be wrapped in a list item block:
-        container_block = container_block.add_block(
-            block.ListItemBlock(parent=container_block, last_block=container_block, attributes=qblock['attributes'].copy())
-            )
-        
-        if self.settings['list_text_blocks_are_p']:
-            this_block = container_block.add_block(
-                block.TextBlockParagraph(
-                parent=container_block, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy()
-                )
-            )
-        else:
-            this_block = container_block.add_block(
-                block.TextBlockPlain(
-                parent=container_block, 
-                last_block=previous_block, 
-                attributes=qblock['attributes'].copy()
-                )
-            )
-        return this_block
-    
-    def make_table_cell_block(self, qblock, this_document, previous_block):
-        
-        # This can be exended easily to cover the 
-        # https://codepen.io/soccerloway/pen/WWJowj
-        # Better table plugin, that allows multi-line paragraphs in cells 
-        # and multi-span cells.  The appraoch is the same -- except that the 
-        # cells and rows both have an id, and the first check should be whether a block
-        # is part of the previous cell. 
-        # https://github.com/soccerloway/quill-better-table
-        
-        container_row = None
-        container_table = None
-        
-        # best case scenario - we are in the same table row are the previous block
-        if previous_block and previous_block.parent and previous_block.parent.parent and isinstance(previous_block.parent.parent, block.TableRowBlock) and \
-        previous_block.parent.parent.row_id == qblock['attributes']['table']: # this would also be in attributes of previous block
-            container_row = previous_block.parent.parent
-            container_table = previous_block.parent.parent.parent
-        # next best case scenario - we are still in a table, but we need a new row
-        elif previous_block and previous_block.parent and previous_block.parent.parent and isinstance(previous_block.parent.parent, block.TableRowBlock):
-            container_table = previous_block.parent.parent
-            container_row = container_table.add_block(
-                block.TableRowBlock(qblock['attributes']['table'],
-                attributes=qblock['attributes'].copy()
-                )
-            )
-        else:
-            # worst case scenario, we need a table too.
-            # remove the id from the attributes
-            table_attributes = qblock['attributes'].copy()
-            del table_attributes['table']
-            
-            container_table = this_document.add_block(
-                block.TableBlock(
-                    attributes=table_attributes,
-                )
-            )
-            
-            container_row = container_table.add_block(
-                block.TableRowBlock(qblock['attributes']['table'],
-                attributes=qblock['attributes'].copy()
-                )
-            )
-        # now at last we can make the table Cell!
-        this_cell = container_row.add_block(
-            block.TableCellBlock(
-                attributes=qblock['attributes'].copy()
+
+    def make_standard_text_block(
+        self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
+    ) -> bks.Block:
+        return this_document.add_block(
+            bks.TextBlockParagraph(
+                parent=this_document,
+                last_block=previous_block,
+                attributes=qblock['attributes'].copy(),
             )
         )
-        
-        # now we can add the contents of the cell
-        this_block = this_cell.add_block(
-            block.TextBlockPlain(
-            parent=container_row, 
-            last_block=previous_block, 
-            attributes=qblock['attributes'].copy()
-            )
-        )
-        
-        return this_block
-    
-    def make_better_table_blocks(self, block, contents, attributes):
-        container_table = None
-        container_row = None
-        if 'table-col' in qblock['attributes']:
-            # we need to make a table column.
-            # this should be the first thing in the table, so we can check to see if one exists, and if not, we can make the table.
-            pass
-        elif 'table-cell-line' in qblock['attributes']:
-            # we have a cell of the table.  
-            pass
-        
-    def image_node_test(self, block, contents, attributes):
-        if isinstance(contents, dict) and 'image' in contents:
-            return True
-        else:
-            return False
-            
-    def make_image_node(self, block, contents, attributes):
+
+    # ---- Node creators ----
+
+    def make_image_node(
+        self, block: bks.Block, contents: dict[str, Any], attributes: dict[str, Any],
+    ) -> node.Node:
         return block.add_node(node.Image(contents=contents, attributes=attributes))
-        
-    def make_string_node(self, block, contents, attributes):
+
+    def make_string_node(
+        self, block: bks.Block, contents: str, attributes: dict[str, Any],
+    ) -> node.Node:
         if isinstance(block, bks.TextBlockCode):
-            return block.add_node(node.TextLine(contents=contents, attributes=attributes, strip_newline=False))
+            return block.add_node(
+                node.TextLine(contents=contents, attributes=attributes, strip_newline=False)
+            )
         else:
-            return block.add_node(node.TextLine(contents=contents, attributes=attributes, strip_newline=True))
-        
-    
-    
-    
-    
+            return block.add_node(
+                node.TextLine(contents=contents, attributes=attributes, strip_newline=True)
+            )

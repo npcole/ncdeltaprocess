@@ -1,0 +1,6 @@
+[
+  {"insert": "Normal text\n"},
+  {"insert": "This is a quote"},
+  {"attributes": {"blockquote": true}, "insert": "\n"},
+  {"insert": "Normal again\n"}
+]

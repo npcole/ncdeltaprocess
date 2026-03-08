@@ -1,0 +1,13 @@
+[
+  {"insert": "\n", "attributes": {"table-col": {"width": "200"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "200"}}},
+  {"attributes": {"bold": true}, "insert": "Header A"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-h", "cell": "cell-ha"}, "row": "row-h"}},
+  {"attributes": {"bold": true}, "insert": "Header B"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-h", "cell": "cell-hb"}, "row": "row-h"}},
+  {"insert": "Normal and "},
+  {"attributes": {"italic": true}, "insert": "italic"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1a"}, "row": "row-1"}},
+  {"attributes": {"link": "https://example.com"}, "insert": "A link"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-1", "cell": "cell-1b"}, "row": "row-1"}}
+]

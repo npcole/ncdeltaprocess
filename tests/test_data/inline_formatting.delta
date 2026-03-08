@@ -1,0 +1,17 @@
+[
+  {"insert": "Normal "},
+  {"attributes": {"bold": true}, "insert": "bold"},
+  {"insert": " "},
+  {"attributes": {"italic": true}, "insert": "italic"},
+  {"insert": " "},
+  {"attributes": {"underline": true}, "insert": "underlined"},
+  {"insert": " "},
+  {"attributes": {"strike": true}, "insert": "struck"},
+  {"insert": " "},
+  {"attributes": {"script": "super"}, "insert": "sup"},
+  {"insert": " "},
+  {"attributes": {"script": "sub"}, "insert": "sub"},
+  {"insert": " "},
+  {"attributes": {"code": true}, "insert": "code"},
+  {"insert": "\n"}
+]

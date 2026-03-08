@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ncdeltaprocess"
+version = "0.1"
+description = "A processor for Quilljs Delta Files."
+license = "BSD-3-Clause"
+authors = [
+    { name = "Nicholas Cole", email = "n@npcole.com" },
+]
+urls.Homepage = "http://www.quillproject.net/"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3",
+]
+
+[project.optional-dependencies]
+latex = ["pylatexenc"]
+
+[tool.setuptools]
+packages = { find = {} }

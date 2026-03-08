@@ -1,0 +1,23 @@
+[
+  {"insert": "\n", "attributes": {"table-col": {"width": "150"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "150"}}},
+  {"insert": "\n", "attributes": {"table-col": {"width": "150"}}},
+  {"insert": "Name"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-a", "cell": "cell-a1"}, "row": "row-a"}},
+  {"insert": "Age"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-a", "cell": "cell-a2"}, "row": "row-a"}},
+  {"insert": "City"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-a", "cell": "cell-a3"}, "row": "row-a"}},
+  {"insert": "Alice"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-b", "cell": "cell-b1"}, "row": "row-b"}},
+  {"insert": "30"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-b", "cell": "cell-b2"}, "row": "row-b"}},
+  {"insert": "London"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-b", "cell": "cell-b3"}, "row": "row-b"}},
+  {"insert": "Bob"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-c", "cell": "cell-c1"}, "row": "row-c"}},
+  {"insert": "25"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-c", "cell": "cell-c2"}, "row": "row-c"}},
+  {"insert": "Paris"},
+  {"insert": "\n", "attributes": {"table-cell-line": {"rowspan": "1", "colspan": "1", "row": "row-c", "cell": "cell-c3"}, "row": "row-c"}}
+]
