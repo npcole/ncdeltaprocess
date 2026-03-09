@@ -289,10 +289,14 @@ class AnnotationBlockContents(RenderOpenCloseMixin, Block):
         self.annotation_id: str = attributes['annotation-content']['id']
 
     def open_tag(self, output_object: OutputObject) -> str:
-        return ''
+        return '<div class="ql-annotation-content" style="display: none;">'
 
     def close_tag(self, output_object: OutputObject) -> str:
-        return ''
+        return '</div>'
+
+    def render_inner(self, mode: str = 'html') -> str:
+        """Render children without the block's own open/close tags."""
+        return ''.join(child.render_tree(mode) for child in self.contents)
 
 
 class ListBlock(RenderOpenCloseMixin, Block):

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import weakref
-from typing import TYPE_CHECKING
-from .render import RenderMixin
+from typing import Any, TYPE_CHECKING
+from .render import RenderMixin, OutputObject
 
 if TYPE_CHECKING:
     from .block import Block
@@ -20,10 +20,21 @@ class QDocument(RenderMixin):
         self.hidden_blocks: list[Block] = []
         self.data_blocks: list[Block] = []
         self.block_index: dict[str, Block] = {}
+        self.settings: dict[str, Any] = {}
 
     @property
     def depth(self) -> int:
         return -1
+
+    def open_tag(self, output_object: OutputObject) -> str:
+        if not self.settings.get('render_annotation_content_blocks', True):
+            return ''
+        from .block import AnnotationBlockContents
+        parts: list[str] = []
+        for block in self.data_blocks:
+            if isinstance(block, AnnotationBlockContents):
+                parts.append(block.render_tree())
+        return ''.join(parts)
 
     def add_block(self, block: Block, this_type: str = 'contents') -> Block:
         match this_type:

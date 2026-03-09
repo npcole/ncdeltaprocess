@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import html as _html
 import weakref
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .sanitize import sanitize_url, CSS_SAFE_PATTERN
 
@@ -81,7 +81,7 @@ class LineRenderHTML(object):
         'add_links',
     ]
 
-    def _sanitize_css_value(self, value: Any) -> str | None:
+    def _sanitize_css_value(self, value: str | int | float) -> str | None:
         """Sanitize a CSS value: only allow safe characters."""
         if CSS_SAFE_PATTERN.match(str(value)):
             return str(value)

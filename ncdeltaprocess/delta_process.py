@@ -15,7 +15,7 @@ import warnings
 import copy
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from .modules import ModuleBase
 
 __all__ = ['TranslatorBase', 'TranslatorQuillJS']
@@ -34,11 +34,13 @@ class TranslatorBase(object):
     def __init__(self, diff_mode: bool = False) -> None:
         self.DIFF_MODE: bool = diff_mode
         self._modules: list[ModuleBase] = []
-        self.block_registry: dict[Any, Any] = {}
-        self.node_registry: dict[Any, Any] = {}
+        self.block_registry: dict[Callable[..., bool], Callable[..., bks.Block]] = {}
+        self.node_registry: dict[Callable[..., bool], Callable[..., node.Node]] = {}
         self.settings: dict[str, Any] = {
             'list_text_blocks_are_p': True,
             'list_better_table_cells_are_p': True,
+            'render_annotation_content_blocks': True,
+            'render_footnote_backlinks': True,
         }
 
     def add_module(self, module_class: type[ModuleBase]) -> None:
@@ -104,6 +106,7 @@ class TranslatorBase(object):
             delta_ops.append({'insert': '\n'})
 
         this_document = QDocument()
+        this_document.settings = self.settings
         previous_block: bks.Block | None = None
         for qblock in self.yield_blocks(delta_ops):
             # Match against registered block handlers
@@ -165,7 +168,7 @@ class TranslatorBase(object):
                 this_block = previous_node.parent
         return this_document
 
-    def is_block(self, insert_instruction: Any) -> bool:
+    def is_block(self, insert_instruction: str | dict[str, Any]) -> bool:
         """Return True if this non-string insert is a block-level embed."""
         return any(m.is_block_embed(insert_instruction) for m in self._modules)
 
@@ -301,7 +304,7 @@ class TranslatorQuillJS(TranslatorBase):
     # ---- Node test functions ----
 
     def image_node_test(
-        self, block: bks.Block, contents: Any, attributes: dict[str, Any],
+        self, block: bks.Block, contents: str | dict[str, Any], attributes: dict[str, Any],
     ) -> bool:
         return isinstance(contents, dict) and 'image' in contents
 

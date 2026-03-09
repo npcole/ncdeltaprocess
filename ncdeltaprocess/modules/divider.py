@@ -21,7 +21,7 @@ class DividerModule(ModuleBase):
         'divider_node_test': 'make_divider_node',
     }
 
-    def is_block_embed(self, insert_instruction: Any) -> bool:
+    def is_block_embed(self, insert_instruction: str | dict[str, Any]) -> bool:
         return isinstance(insert_instruction, dict) and 'divider' in insert_instruction
 
     def divider_block_test(
@@ -33,7 +33,7 @@ class DividerModule(ModuleBase):
                 and 'divider' in qblock['contents'][0]['insert'])
 
     def divider_node_test(
-        self, block: bks.Block, contents: Any, attributes: dict[str, Any],
+        self, block: bks.Block, contents: str | dict[str, Any], attributes: dict[str, Any],
     ) -> bool:
         return isinstance(contents, dict) and 'divider' in contents
 

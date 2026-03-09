@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import html as _html
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from .render import RenderMixin, OutputObject
 from .sanitize import sanitize_url, sanitize_latex_url
 from .document import QDocument
 from .html_line_render import LineRenderHTML
 from .latex_line_render import LineRenderLaTeX
+
+if TYPE_CHECKING:
+    from .block import Block
 
 
 __all__ = [
@@ -24,7 +27,7 @@ class Node(object):
         self,
         contents: str | dict[str, Any],
         attributes: dict[str, Any] | None = None,
-        parent: Any = None,
+        parent: Block | None = None,
         previous_node: Node | None = None,
     ) -> None:
         self.contents = contents
@@ -112,11 +115,11 @@ class AnnotationMarkerNode(RenderMixin, Node):
 
     def render_contents_html(self, output: OutputObject) -> str:
         an_block = self._get_annotation_block()
-        return '<span class="annotation"><span class="annotation-content">' + an_block.render_tree() + '</span></span>'
+        return '<span class="annotation"><span class="annotation-content">' + an_block.render_inner() + '</span></span>'
 
     def render_contents_latex(self, output: OutputObject) -> str:
         an_block = self._get_annotation_block()
-        return r'\marginpar{' + an_block.render_tree(mode='latex') + '}'
+        return r'\marginpar{' + an_block.render_inner(mode='latex') + '}'
 
 
 class FootnoteMarkerNode(RenderMixin, Node):
@@ -136,14 +139,16 @@ class FootnoteMarkerNode(RenderMixin, Node):
         output.fn_count += 1
         this_id = _html.escape(self.attributes['annotation-marker']['id'], quote=True)
         an_block = self._get_annotation_block()
-        output.end_matter.append(
-            f'<div class="footnote-block"><span id="fn-{this_id}" class="footnote-number">'
-            f'[{output.fn_count}]</span> '
-            + an_block.render_tree()
-            + '</div>'
-        )
+        doc = self.find_document()
+        if doc.settings.get('render_footnote_backlinks', True):
+            output.end_matter.append(
+                f'<div class="footnote-block"><span id="fn-{this_id}" class="footnote-number">'
+                f'[{output.fn_count}]</span> '
+                + an_block.render_inner()
+                + '</div>'
+            )
         return f'<span class="footnote-marker"><a href="#fn-{this_id}">[{output.fn_count}]</a></span>'
 
     def render_contents_latex(self, output: OutputObject) -> str:
         an_block = self._get_annotation_block()
-        return r'\footnote{' + an_block.render_tree(mode='latex') + '}'
+        return r'\footnote{' + an_block.render_inner(mode='latex') + '}'

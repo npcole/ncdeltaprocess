@@ -21,7 +21,8 @@ class ListModule(ModuleBase):
     def list_test(
         self, qblock: dict[str, Any], this_document: QDocument, previous_block: bks.Block | None,
     ) -> bool:
-        return 'list' in qblock['attributes']
+        return ('list' in qblock['attributes']
+                and 'annotation-content' not in qblock['attributes'])
 
     @staticmethod
     def _build_list_depth(

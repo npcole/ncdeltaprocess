@@ -31,7 +31,7 @@ class ModuleBase:
         import weakref
         self.parent: TranslatorBase = weakref.proxy(parent)
 
-    def is_block_embed(self, insert_instruction: Any) -> bool:
+    def is_block_embed(self, insert_instruction: str | dict[str, Any]) -> bool:
         """Return True if this non-string insert is a block-level embed.
 
         Override in subclasses that handle block-level embeds.
