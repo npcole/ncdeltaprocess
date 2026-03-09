@@ -99,7 +99,11 @@ class TableBetterModule(ModuleBase):
         """Get or create the cell block for the given cell info."""
         if isinstance(previous_block, TableBetter2Block):
             new_row = previous_block.add_row(cell_info.row_id)
-            previous_cell = new_row.add_cell(cell_info.cell_id)
+            previous_cell = new_row.add_cell(
+                cell_info.cell_id,
+                col_span=cell_info.col_span,
+                row_span=cell_info.row_span,
+            )
         elif isinstance(previous_block, TableBetter2CellBlock):
             previous_cell = previous_block
         else:
@@ -121,7 +125,11 @@ class TableBetterModule(ModuleBase):
             return previous_cell
         # Same row?
         if cell_info.row_id == previous_cell.row_id:
-            return previous_cell.parent.add_cell(cell_info.cell_id)
+            return previous_cell.parent.add_cell(
+                cell_info.cell_id,
+                col_span=cell_info.col_span,
+                row_span=cell_info.row_span,
+            )
         # New row
         this_row = previous_cell.find_ancestor(TableBetter2Block).add_row(cell_info.row_id)
         return this_row.add_cell(
