@@ -31,6 +31,13 @@ try:
     # Rendered using textcomp or math-mode equivalents that work with
     # standard pdflatex + utf8 inputenc.
     _EXTRA_LATEX_CHARS = {
+        # ``[`` and ``]`` are wrapped ``{[}`` / ``{]}`` so LaTeX
+        # doesn't mistake them for an optional argument to a preceding
+        # ``\par`` / ``\\`` / ``\item`` etc. Folded into the encoder
+        # dict (rather than a separate ``.replace()`` pass after
+        # encoding) so bracket protection costs nothing extra per call.
+        ord('['): r'{[}',
+        ord(']'): r'{]}',
         ord('₵'): r'\textcent{}',          # ₵ Ghanaian cedi sign (closest available)
         ord('₦'): r'N\hspace{-0.3em}=',    # ₦ Nigerian naira sign
         ord('₱'): r'P\hspace{-0.3em}=',    # ₱ Philippine peso sign
@@ -80,6 +87,8 @@ except ImportError:
             ("&", "\\&"), ("%", "\\%"), ("$", "\\$"),
             ("#", "\\#"), ("_", "\\_"),
             ("~", "\\textasciitilde{}"), ("^", "\\textasciicircum{}"),
+            # Bracket protection — see note on _EXTRA_LATEX_CHARS above.
+            ("[", "{[}"), ("]", "{]}"),
         ]:
             text = text.replace(char, replacement)
         return text
@@ -140,15 +149,11 @@ class LineRenderLaTeX(object):
     def pre_process_line(self, text_line: str) -> str:
         """Escape a plain text string for safe inclusion in LaTeX.
 
-        After ``unicode_to_latex`` handles standard escaping, square
-        brackets are protected: ``[`` → ``{[}`` and ``]`` → ``{]}``.
-        This prevents LaTeX from interpreting ``[...]`` in body text as
-        an optional argument to a preceding command (``\\par``,
-        ``\\noindent``, ``\\\\``, ``\\item``, etc.).
+        Bracket protection (``[`` → ``{[}`` / ``]`` → ``{]}``) is
+        folded into the encoder's char map, so the single
+        ``unicode_to_latex`` pass handles everything.
         """
-        result = unicode_to_latex(text_line)
-        result = result.replace('[', '{[}').replace(']', '{]}')
-        return result
+        return unicode_to_latex(text_line)
 
     def process_line_with_attributes(self, text_line: str) -> str:
         """Convert a text run to LaTeX, wrapping with commands for active attributes."""

@@ -12,6 +12,7 @@ from the first row's cells.
 
 from __future__ import annotations
 
+import functools
 import html as _html
 import re
 import weakref
@@ -279,7 +280,12 @@ class TableBetter2Block(RenderOpenCloseMixin, Block):
                 columns.append(ColumnInfo(width=None))
         return columns
 
-    @property
+    # Cached once per instance — column structure is determined by the
+    # first row's cells, which are populated during translation and
+    # never change after rendering starts. If a future caller needs to
+    # mutate the table post-construction it can ``del table._columns``
+    # to drop the cache.
+    @functools.cached_property
     def _columns(self) -> list[ColumnInfo]:
         return self.get_columns()
 
@@ -373,7 +379,15 @@ class TableBetter2RowBlock(RenderOpenCloseMixin, Block):
     def close_tag(self, output_object: OutputObject) -> str:
         return '</%s>' % self.get_tag()
 
+    def open_latex(self, output_object: OutputObject) -> str:
+        # Start a fresh per-row cell counter; cells in this row will
+        # consume and increment it. Pushed (not assigned) so nested
+        # tables work correctly.
+        output_object.cell_position_stack.append(0)
+        return ''
+
     def close_latex(self, output_object: OutputObject) -> str:
+        output_object.cell_position_stack.pop()
         return r' \\' '\n' r'\hline' '\n'
 
 
@@ -434,15 +448,12 @@ class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        # Emit '& ' separator before every cell except the first in the row.
-        parent = self.parent
-        if parent is not None and hasattr(parent, 'contents'):
-            for sibling in parent.contents:
-                if isinstance(sibling, TableBetter2CellBlock):
-                    if sibling is self:
-                        return ''  # first cell — no separator
-                    break
-        return ' & '
+        stack = output_object.cell_position_stack
+        if not stack:
+            return ''
+        pos = stack[-1]
+        stack[-1] = pos + 1
+        return '' if pos == 0 else ' & '
 
     def close_latex(self, output_object: OutputObject) -> str:
         return ''

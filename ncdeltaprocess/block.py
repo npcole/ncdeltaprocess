@@ -459,7 +459,15 @@ class TableRowBlock(RenderOpenCloseMixin, Block):
     def close_tag(self, output_object: OutputObject) -> str:
         return '</tr>'
 
+    def open_latex(self, output_object: OutputObject) -> str:
+        # Start a fresh per-row cell counter; cells in this row will
+        # consume and increment it. Pushed (not assigned) so nested
+        # tables are handled correctly.
+        output_object.cell_position_stack.append(0)
+        return ''
+
     def close_latex(self, output_object: OutputObject) -> str:
+        output_object.cell_position_stack.pop()
         return r' \\' '\n' r'\hline' '\n'
 
 
@@ -471,9 +479,7 @@ class TableCellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        if _is_first_cell_in_row(self):
-            return ''
-        return ' & '
+        return _cell_latex_separator(output_object)
 
     def close_latex(self, output_object: OutputObject) -> str:
         return ''
@@ -504,22 +510,25 @@ class TableBetterCellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        if _is_first_cell_in_row(self):
-            return ''
-        return ' & '
+        return _cell_latex_separator(output_object)
 
     def close_latex(self, output_object: OutputObject) -> str:
         return ''
 
 
-def _is_first_cell_in_row(cell: Block) -> bool:
-    """True if *cell* is the first cell block among its parent's children."""
-    parent = cell.parent
-    if parent is not None and hasattr(parent, 'contents'):
-        for sibling in parent.contents:
-            if isinstance(sibling, (TableCellBlock, TableBetterCellBlock)):
-                return sibling is cell
-    return True
+def _cell_latex_separator(output_object: OutputObject) -> str:
+    """Return '' for the first cell in the current row, ' & ' for the rest.
+
+    Reads the per-row counter pushed by the enclosing row's ``open_latex``
+    and increments it in place. ``O(1)`` per cell — no sibling iteration.
+    """
+    stack = output_object.cell_position_stack
+    if not stack:
+        # Defensive: a cell rendered outside any row gets no separator.
+        return ''
+    pos = stack[-1]
+    stack[-1] = pos + 1
+    return '' if pos == 0 else ' & '
 
 
 class TableColumnDescriptor(RenderOpenCloseMixin, Block):

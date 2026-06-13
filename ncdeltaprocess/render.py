@@ -15,6 +15,11 @@ class OutputObject(object):
         self.end_matter: list[str] = []
         self.fn_count: int = 0
         self.heading_base_level: int = 0
+        # Per-row cell counter for LaTeX table rendering. A row's
+        # ``open_latex`` pushes 0 here, each cell increments and reads,
+        # and the row's ``close_latex`` pops. Stack form supports
+        # nested tables.
+        self.cell_position_stack: list[int] = []
 
     def append(self, content: str) -> None:
         return self.contents.append(content)
