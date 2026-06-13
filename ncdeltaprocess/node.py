@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import html as _html
-from typing import Any, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 from .render import RenderMixin, OutputObject
 from .sanitize import sanitize_url, sanitize_latex_url
 from .document import QDocument
@@ -52,20 +52,41 @@ class TextLine(RenderMixin, Node):
     HTML_RENDER_CLASS: type[LineRenderHTML] = LineRenderHTML
     LATEX_RENDER_CLASS: type[LineRenderLaTeX] = LineRenderLaTeX
 
-    def __init__(self, strip_newline: bool = False, *args: Any, **keywords: Any) -> None:
+    def __init__(
+        self,
+        strip_newline: bool = False,
+        extra_html_processors: list[Callable[['TextLine', str], str]] | None = None,
+        extra_latex_processors: list[Callable[['TextLine', str], str]] | None = None,
+        *args: Any,
+        **keywords: Any,
+    ) -> None:
         super(TextLine, self).__init__(*args, **keywords)
         if strip_newline and self.contents.endswith("\n"):
             self.contents = self.contents[:-1]
         self.html_renderer: LineRenderHTML = self.HTML_RENDER_CLASS(self)
         self.latex_renderer: LineRenderLaTeX = self.LATEX_RENDER_CLASS(self)
+        # Module-supplied processors run after the renderer's own pipeline.
+        # Stored by reference: late-registered modules become visible to
+        # already-created nodes.
+        self.extra_html_processors: list[Callable[['TextLine', str], str]] = (
+            extra_html_processors if extra_html_processors is not None else []
+        )
+        self.extra_latex_processors: list[Callable[['TextLine', str], str]] = (
+            extra_latex_processors if extra_latex_processors is not None else []
+        )
 
     def render_contents_html(self, output: OutputObject) -> str:
         result = self.html_renderer.pre_process_line(self.contents)
         result = self.html_renderer.process_line_with_attributes(result)
+        for proc in self.extra_html_processors:
+            result = proc(self, result)
         return result
 
     def render_contents_latex(self, output: OutputObject) -> str:
-        return self.latex_renderer.process_line_with_attributes(self.contents)
+        result = self.latex_renderer.process_line_with_attributes(self.contents)
+        for proc in self.extra_latex_processors:
+            result = proc(self, result)
+        return result
 
 
 class Image(RenderMixin, Node):

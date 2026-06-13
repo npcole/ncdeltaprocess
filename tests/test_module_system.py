@@ -231,6 +231,28 @@ class TestDiffMode(unittest.TestCase):
         html = t.translate_to_html(ops)
         self.assertIn('quill-diff-edit', html)
 
+    def test_diff_mode_css_classes_restyled(self):
+        """Restyled text (formatting changed by an amendment) should
+        render with the quill-diff-edit CSS class."""
+        ops = [
+            {'insert': 'Restyled text', 'attributes': {'ncquill_diff': 'restyled'}},
+            {'insert': '\n'},
+        ]
+        t = TranslatorQuillJS(diff_mode=True)
+        html = t.translate_to_html(ops)
+        self.assertIn('quill-diff-edit', html)
+        self.assertIn('Restyled text', html)
+
+    def test_diff_mode_css_classes_restyled_via_quill_diff(self):
+        """Same test using the quill_diff attribute key."""
+        ops = [
+            {'insert': 'Restyled text', 'attributes': {'quill_diff': 'restyled'}},
+            {'insert': '\n'},
+        ]
+        t = TranslatorQuillJS(diff_mode=True)
+        html = t.translate_to_html(ops)
+        self.assertIn('quill-diff-edit', html)
+
     def test_diff_mode_paragraph_classes(self):
         ops = [
             {'insert': 'Changed para'},

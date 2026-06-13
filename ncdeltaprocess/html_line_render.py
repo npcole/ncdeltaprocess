@@ -69,6 +69,7 @@ class LineRenderHTML(object):
         'new': 'quill-diff-insert',
         'removed': 'quill-diff-delete',
         'edited': 'quill-diff-edit',
+        'restyled': 'quill-diff-edit',
     }
 
     css_classes: list[tuple[str, str]] = [

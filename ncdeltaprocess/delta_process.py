@@ -11,6 +11,7 @@ from .modules.divider import DividerModule
 from .modules.lists import ListModule
 from .modules.table_quill2 import TableQuill2Module
 from .modules.table_better_table import BetterTableModule
+from .modules.table_better import TableBetterModule
 import warnings
 import copy
 
@@ -36,6 +37,11 @@ class TranslatorBase(object):
         self._modules: list[ModuleBase] = []
         self.block_registry: dict[Callable[..., bool], Callable[..., bks.Block]] = {}
         self.node_registry: dict[Callable[..., bool], Callable[..., node.Node]] = {}
+        # Post-processors aggregated from all registered modules; passed to
+        # every TextLine by reference, so modules registered later are
+        # visible to already-created nodes at render time.
+        self._html_text_post_processors: list[Callable[[node.Node, str], str]] = []
+        self._latex_text_post_processors: list[Callable[[node.Node, str], str]] = []
         self.settings: dict[str, Any] = {
             'list_text_blocks_are_p': True,
             'list_better_table_cells_are_p': True,
@@ -43,9 +49,15 @@ class TranslatorBase(object):
             'render_footnote_backlinks': True,
         }
 
-    def add_module(self, module_class: type[ModuleBase]) -> None:
-        """Register a module that provides additional block/node handlers."""
-        module = module_class(parent=self)
+    def add_module(self, module_class: type[ModuleBase], **kwargs: Any) -> ModuleBase:
+        """Register a module that extends this translator.
+
+        Extra ``kwargs`` are forwarded to the module's constructor — use
+        these to configure modules that need per-instance state.
+
+        Returns the instantiated module so callers can hold a reference.
+        """
+        module = module_class(parent=self, **kwargs)
         self._modules.append(module)
         self.settings.update(module.settings)
         for reg in ('block_registry', 'node_registry'):
@@ -71,6 +83,19 @@ class TranslatorBase(object):
                 else:
                     vl = vln
                 my_registry[ky] = vl
+        # Aggregate text-run post-processors
+        for mode, target in (
+            ('html_text_post_processors', self._html_text_post_processors),
+            ('latex_text_post_processors', self._latex_text_post_processors),
+        ):
+            for proc_name in getattr(module, mode):
+                if not hasattr(module, proc_name):
+                    raise AttributeError(
+                        f"{module_class.__name__}.{mode} references "
+                        f"missing method '{proc_name}'"
+                    )
+                target.append(getattr(module, proc_name))
+        return module
 
     def translate_to_html(self, delta_ops: list[DeltaOp]) -> str:
         return self.ops_to_internal_representation(delta_ops).render_tree()
@@ -259,14 +284,19 @@ class TranslatorBase(object):
         contents: str,
         attributes: dict[str, Any],
     ) -> node.Node:
-        if isinstance(block, bks.TextBlockCode):
-            return block.add_node(
-                node.TextLine(contents=contents, attributes=attributes, strip_newline=False)
+        strip_newline = not isinstance(block, bks.TextBlockCode)
+        n = block.add_node(
+            node.TextLine(
+                contents=contents,
+                attributes=attributes,
+                strip_newline=strip_newline,
+                extra_html_processors=self._html_text_post_processors,
+                extra_latex_processors=self._latex_text_post_processors,
             )
-        else:
-            return block.add_node(
-                node.TextLine(contents=contents, attributes=attributes, strip_newline=True)
-            )
+        )
+        for module in self._modules:
+            module.configure_text_line(n)
+        return n
 
 
 class TranslatorQuillJS(TranslatorBase):
@@ -287,6 +317,7 @@ class TranslatorQuillJS(TranslatorBase):
         self.add_module(DividerModule)
         self.add_module(TableQuill2Module)
         self.add_module(BetterTableModule)
+        self.add_module(TableBetterModule)
 
     # ---- Block test functions ----
 
@@ -354,15 +385,3 @@ class TranslatorQuillJS(TranslatorBase):
         self, block: bks.Block, contents: dict[str, Any], attributes: dict[str, Any],
     ) -> node.Node:
         return block.add_node(node.Image(contents=contents, attributes=attributes))
-
-    def make_string_node(
-        self, block: bks.Block, contents: str, attributes: dict[str, Any],
-    ) -> node.Node:
-        if isinstance(block, bks.TextBlockCode):
-            return block.add_node(
-                node.TextLine(contents=contents, attributes=attributes, strip_newline=False)
-            )
-        else:
-            return block.add_node(
-                node.TextLine(contents=contents, attributes=attributes, strip_newline=True)
-            )
