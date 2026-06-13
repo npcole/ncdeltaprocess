@@ -307,7 +307,17 @@ class TextBlockHeading(RenderOpenCloseMixin, Block):
 
 
 class AnnotationBlockContents(RenderOpenCloseMixin, Block):
-    """Container for annotation/footnote content, stored in document data_blocks."""
+    """Container for annotation/footnote content, stored in document data_blocks.
+
+    Rendered as a leaf in both modes: the full opening wrapper, the
+    children's inlined contents (via :meth:`render_inner`), and the
+    closing wrapper are emitted in a single shot. This keeps the body
+    render path (the hidden div assembled in ``QDocument.open_tag``)
+    and the inline render path (called from marker nodes) producing the
+    same text — multi-block content keeps its line structure in both.
+    """
+
+    is_leaf: bool = True
 
     def __init__(
         self,
@@ -320,15 +330,49 @@ class AnnotationBlockContents(RenderOpenCloseMixin, Block):
         self.annotation_type: str = attributes['annotation-content']['type']
         self.annotation_id: str = attributes['annotation-content']['id']
 
-    def open_tag(self, output_object: OutputObject) -> str:
-        return '<div class="ql-annotation-content" style="display: none;">'
+    def render_contents_html(self, output: OutputObject) -> str:
+        return (
+            '<div class="ql-annotation-content" style="display: none;">'
+            + self.render_inner('html')
+            + '</div>'
+        )
 
-    def close_tag(self, output_object: OutputObject) -> str:
-        return '</div>'
+    def render_contents_latex(self, output: OutputObject) -> str:
+        # Annotation content has no top-level LaTeX wrapper — markers
+        # pull it inline via ``\footnote{...}`` / ``\marginpar{...}``.
+        # Nothing should be emitted at the document level.
+        return ''
+
+    # Visual separator between bare-plain children when inlining the
+    # annotation content (inside marker spans, footnote/marginpar
+    # commands). Block-shaped children (lists, paragraphs, code blocks)
+    # already terminate themselves so we don't add a separator before
+    # or after them.
+    _INNER_SEPARATORS: dict[str, str] = {'html': '<br>', 'latex': '\\\\\n'}
 
     def render_inner(self, mode: str = 'html') -> str:
-        """Render children without the block's own open/close tags."""
-        return ''.join(child.render_tree(mode) for child in self.contents)
+        """Render children, inlining them with a visual separator between
+        bare-plain blocks so multi-block annotation content keeps its
+        line structure when dropped inside a marker span or LaTeX
+        ``\\footnote{...}``. Plain children's trailing newlines (the
+        ``\\n\\n`` paragraph break emitted by ``TextBlockPlain.close_latex``)
+        are stripped so they don't compound with the inline separator.
+        """
+        sep = self._INNER_SEPARATORS.get(mode, '')
+        parts: list[str] = []
+        prev_is_plain = False
+        for child in self.contents:
+            # Only TextBlockPlain (not its subclasses, which carry their
+            # own block markers) participates in the inline separator.
+            is_plain = type(child) is TextBlockPlain
+            rendered = child.render_tree(mode)
+            if is_plain:
+                rendered = rendered.strip('\n')
+            if sep and parts and prev_is_plain and is_plain:
+                parts.append(sep)
+            parts.append(rendered)
+            prev_is_plain = is_plain
+        return ''.join(parts)
 
 
 class ListBlock(RenderOpenCloseMixin, Block):

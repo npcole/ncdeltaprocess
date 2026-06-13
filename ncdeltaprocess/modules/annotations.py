@@ -134,6 +134,11 @@ class AnnotationModule(ModuleBase):
                 container, previous_block, format_value,
             )
         else:
+            # Plain text annotation content stays as ``TextBlockPlain``
+            # (no wrapping tags), so it composes correctly when the
+            # marker drops it inline inside ``<span class="annotation-content">``
+            # or ``\\footnote{...}``. Multi-block content gets visual
+            # separators from ``AnnotationBlockContents.render_inner``.
             return container.add_block(
                 bks.TextBlockPlain(
                     last_block=previous_block,

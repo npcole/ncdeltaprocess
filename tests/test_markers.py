@@ -107,6 +107,61 @@ class TestFootnote(unittest.TestCase):
         self.assertIn('First footnote content', html)
         self.assertIn('Second footnote content', html)
 
+    def test_multiline_footnote_content_keeps_line_breaks(self):
+        """Multi-block footnote/annotation content must keep its line
+        structure when inlined into a marker span or footnote-block
+        div. Without a visual separator between bare-plain children,
+        ``"line1\\nline2"`` collapses to ``"line1line2"`` — silent data
+        loss that this test guards against.
+        """
+        ops = [
+            {
+                "attributes": {
+                    "annotation-content": {"id": "fn1", "type": "Footnote"}
+                },
+                "insert": "first line\nsecond line\n",
+            },
+            {"insert": "body "},
+            {
+                "attributes": {
+                    "annotation-marker": {"id": "fn1", "type": "Footnote"}
+                },
+                "insert": "※",
+            },
+            {"insert": " end.\n"},
+        ]
+        html = TranslatorQuillJS().translate_to_html(ops)
+        # No collapse — "first linesecond line" would be the regression
+        self.assertNotIn('first linesecond line', html)
+        # A <br> separates the inlined plain blocks inside the
+        # footnote-block end-matter div.
+        self.assertIn('first line<br>second line', html)
+
+    def test_multiline_footnote_content_latex(self):
+        """Same as the HTML version — multi-block annotation content
+        must keep its line structure when dropped into a LaTeX
+        ``\\footnote{...}``. The separator is ``\\\\\\n``.
+        """
+        ops = [
+            {
+                "attributes": {
+                    "annotation-content": {"id": "fn1", "type": "Footnote"}
+                },
+                "insert": "first line\nsecond line\n",
+            },
+            {"insert": "body "},
+            {
+                "attributes": {
+                    "annotation-marker": {"id": "fn1", "type": "Footnote"}
+                },
+                "insert": "※",
+            },
+            {"insert": " end.\n"},
+        ]
+        latex = TranslatorQuillJS().translate_to_latex(ops)
+        self.assertNotIn('first linesecond line', latex)
+        self.assertIn('first line\\\\\nsecond line', latex)
+
 
 class TestAnnotationDataBlocks(unittest.TestCase):
     def test_annotation_stored_in_data_blocks_when_disabled(self):
