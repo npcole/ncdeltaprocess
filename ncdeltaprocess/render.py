@@ -54,10 +54,13 @@ class RenderMixin(object):
         mode: str = 'html',
         heading_base_level: int | None = None,
     ) -> str:
-        """A non-recursive way to render the tree.
+        """Iteratively render the document tree.
 
-        Uses set-based visited tracking with id() for O(1) lookups
-        and cycle detection to prevent infinite loops.
+        Each non-leaf block is pushed twice: once as ``(node, False)``
+        so its open marker fires and its children are queued, then
+        re-pushed as ``(node, True)`` so the second pop emits its close
+        marker. Leaves are pushed once. The document is assumed to be a
+        proper tree — no cycle detection is performed.
 
         Args:
             mode: ``'html'`` or ``'latex'``.
@@ -75,29 +78,23 @@ class RenderMixin(object):
         if heading_base_level is not None:
             output.heading_base_level = heading_base_level
 
-        stack: list[RenderMixin] = []
-        already_visited: set[int] = set()
-        stack.append(self)
+        stack: list[tuple[RenderMixin, bool]] = [(self, False)]
         while stack:
-            this_node = stack.pop()
-            node_id = id(this_node)
-            if node_id not in already_visited:
-                already_visited.add(node_id)
-                if this_node.is_leaf:
-                    output.append(getattr(this_node, render_call)(output))
-                else:
-                    if hasattr(this_node, open_block_call):
-                        output.append(getattr(this_node, open_block_call)(output))
-                    if hasattr(this_node, close_block_call):
-                        stack.append(this_node)
-                    for c in reversed(this_node.contents):
-                        stack.append(c)
+            this_node, is_close = stack.pop()
+            if is_close:
+                close = getattr(this_node, close_block_call, None)
+                if close is not None:
+                    output.append(close(output))
+            elif this_node.is_leaf:
+                output.append(getattr(this_node, render_call)(output))
             else:
-                if this_node.is_leaf:
-                    pass
-                else:
-                    if hasattr(this_node, close_block_call):
-                        output.append(getattr(this_node, close_block_call)(output))
+                open_fn = getattr(this_node, open_block_call, None)
+                if open_fn is not None:
+                    output.append(open_fn(output))
+                if hasattr(this_node, close_block_call):
+                    stack.append((this_node, True))
+                for c in reversed(this_node.contents):
+                    stack.append((c, False))
         return output.merge()
 
 
