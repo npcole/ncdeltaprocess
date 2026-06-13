@@ -254,8 +254,38 @@ class TextBlockHeading(RenderOpenCloseMixin, Block):
             return '</p>'
         return f'</{header_tag}>'
 
+    # Font-size commands for centred/aligned headings (no \section spacing).
+    _ALIGNED_HEADING_SIZES: dict[int, str] = {
+        1: r'\Large\bfseries',
+        2: r'\large\bfseries',
+        3: r'\normalsize\bfseries',
+        4: r'\normalsize\bfseries',
+        5: r'\small\bfseries',
+    }
+
+    def _get_latex_align_envs(self) -> list[str]:
+        """Return LaTeX environment names for the heading's align attribute."""
+        envs: list[str] = []
+        if 'align' in self.attributes:
+            match self.attributes['align']:
+                case 'center':
+                    envs.append('center')
+                case 'right':
+                    envs.append('flushright')
+                case 'left':
+                    envs.append('flushleft')
+        return envs
+
     def open_latex(self, output_object: OutputObject) -> str:
         header_val = int(self.attributes['header']) + output_object.heading_base_level
+        envs = self._get_latex_align_envs()
+        if envs:
+            # Aligned headings: use font sizing rather than \section so the
+            # large vertical spacing that sectioning commands add doesn't
+            # bracket the alignment env.
+            size_cmd = self._ALIGNED_HEADING_SIZES.get(header_val, r'\bfseries')
+            prefix = ''.join(f'\\begin{{{e}}}' for e in envs) + '\n'
+            return prefix + '{' + size_cmd + ' '
         match header_val:
             case 1:
                 return r'\section{'
@@ -271,7 +301,9 @@ class TextBlockHeading(RenderOpenCloseMixin, Block):
                 return r'\textbf{'
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return '}\n'
+        envs = self._get_latex_align_envs()
+        suffix = ''.join(f'\\end{{{e}}}' for e in envs) + '\n' if envs else ''
+        return '}\n' + suffix
 
 
 class AnnotationBlockContents(RenderOpenCloseMixin, Block):
@@ -394,11 +426,19 @@ class BetterTableBlock(RenderOpenCloseMixin, Block):
         return '</table>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        cols = '|'.join('c' for _ in self._columns) if self._columns else 'c'
-        return r'\begin{tabular}{|' + cols + r'|} \hline'
+        n = len(self._columns) or 1
+        # Equal-width wrapping columns that share \linewidth; longtable
+        # allows the table to break across pages.
+        col_width = f'{0.9 / n:.2f}\\linewidth'
+        cols = '|'.join(f'p{{{col_width}}}' for _ in range(n))
+        return (
+            r'\par\medskip' '\n'
+            r'\begin{longtable}{|' + cols + r'|}' '\n'
+            r'\hline' '\n'
+        )
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\end{tabular}'
+        return r'\end{longtable}' '\n' r'\medskip' '\n'
 
 
 class TableRowBlock(RenderOpenCloseMixin, Block):
@@ -420,7 +460,7 @@ class TableRowBlock(RenderOpenCloseMixin, Block):
         return '</tr>'
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\\ \hline'
+        return r' \\' '\n' r'\hline' '\n'
 
 
 class TableCellBlock(RenderOpenCloseMixin, Block):
@@ -430,8 +470,13 @@ class TableCellBlock(RenderOpenCloseMixin, Block):
     def close_tag(self, output_object: OutputObject) -> str:
         return '</td>'
 
+    def open_latex(self, output_object: OutputObject) -> str:
+        if _is_first_cell_in_row(self):
+            return ''
+        return ' & '
+
     def close_latex(self, output_object: OutputObject) -> str:
-        return r' & '
+        return ''
 
 
 class TableBetterCellBlock(RenderOpenCloseMixin, Block):
@@ -457,6 +502,24 @@ class TableBetterCellBlock(RenderOpenCloseMixin, Block):
 
     def close_tag(self, output_object: OutputObject) -> str:
         return '</td>'
+
+    def open_latex(self, output_object: OutputObject) -> str:
+        if _is_first_cell_in_row(self):
+            return ''
+        return ' & '
+
+    def close_latex(self, output_object: OutputObject) -> str:
+        return ''
+
+
+def _is_first_cell_in_row(cell: Block) -> bool:
+    """True if *cell* is the first cell block among its parent's children."""
+    parent = cell.parent
+    if parent is not None and hasattr(parent, 'contents'):
+        for sibling in parent.contents:
+            if isinstance(sibling, (TableCellBlock, TableBetterCellBlock)):
+                return sibling is cell
+    return True
 
 
 class TableColumnDescriptor(RenderOpenCloseMixin, Block):

@@ -191,7 +191,7 @@ class TestLatexEscaping(unittest.TestCase):
 
 class TestLatexTable(unittest.TestCase):
     def test_better_table_latex(self):
-        """Better table should render as tabular environment."""
+        """Better table renders as longtable so it can break across pages."""
         from ncdeltaprocess import block
         from ncdeltaprocess.document import QDocument
 
@@ -208,8 +208,10 @@ class TestLatexTable(unittest.TestCase):
         cell2.add_node(block.TextBlockPlain())
 
         latex = doc.render_tree(mode='latex')
-        self.assertIn(r'\begin{tabular}', latex)
-        self.assertIn(r'\end{tabular}', latex)
+        self.assertIn(r'\begin{longtable}', latex)
+        self.assertIn(r'\end{longtable}', latex)
+        # p{...\linewidth} column spec rather than fixed 'c' columns
+        self.assertIn(r'\linewidth', latex)
 
 
 class TestLatexImage(unittest.TestCase):

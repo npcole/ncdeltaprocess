@@ -32,10 +32,8 @@ from ncdeltaprocess.modules.table_better import (
 
 
 def _make_translator():
-    """Create a TranslatorQuillJS with quill-table-better module registered."""
-    t = TranslatorQuillJS()
-    t.add_module(TableBetterModule)
-    return t
+    """Create a TranslatorQuillJS (quill-table-better is auto-registered)."""
+    return TranslatorQuillJS()
 
 
 class TestBasicTable(unittest.TestCase):
@@ -191,7 +189,11 @@ class TestTableTemporaryAttributes(unittest.TestCase):
         ]
         t = _make_translator()
         html = t.translate_to_html(ops)
-        self.assertIn('<table>', html)
+        self.assertIn('<table ', html)
+        self.assertIn('class="ql-table-better custom-class"', html)
+        self.assertIn('border="1"', html)
+        self.assertIn('width: 100%', html)
+        self.assertIn('border-style: solid', html)
         self.assertIn('Cell', html)
 
     def test_table_temporary_with_cellspacing(self):
@@ -211,7 +213,8 @@ class TestTableTemporaryAttributes(unittest.TestCase):
         ]
         t = _make_translator()
         html = t.translate_to_html(ops)
-        self.assertIn('<table>', html)
+        self.assertIn('border="0"', html)
+        self.assertIn('cellspacing="0"', html)
 
     def test_table_temporary_empty_dict(self):
         """table-temporary: {} (empty dict)."""
@@ -856,7 +859,7 @@ class TestCellStyleAttributes(unittest.TestCase):
     """Tests for cell-level styling via table-cell attributes."""
 
     def test_cell_with_width_and_height(self):
-        """Cell with explicit width and height."""
+        """Cell with explicit width and height renders as style."""
         ops = [
             {'insert': '\n', 'attributes': {'table-temporary': True}},
             {'insert': 'Sized'},
@@ -872,7 +875,8 @@ class TestCellStyleAttributes(unittest.TestCase):
         t = _make_translator()
         html = t.translate_to_html(ops)
         self.assertIn('Sized', html)
-        self.assertIn('<table>', html)
+        self.assertIn('width: 200', html)
+        self.assertIn('height: 50', html)
 
     def test_cell_with_style_attribute(self):
         """Cell with inline style (background-color, border, etc.)."""
@@ -890,8 +894,191 @@ class TestCellStyleAttributes(unittest.TestCase):
         t = _make_translator()
         html = t.translate_to_html(ops)
         self.assertIn('Styled', html)
-        # The module should at least not crash on style attributes
-        self.assertIn('<table>', html)
+        self.assertIn('background-color: #f0f0f0', html)
+        self.assertIn('border-style: solid', html)
+        self.assertIn('border-width: 1px', html)
+
+    def test_cell_background_color(self):
+        """Cell with background-color in style attribute."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Highlighted'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-bg',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'background-color: #ffcc00',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('style="background-color: #ffcc00"', html)
+
+    def test_cell_text_align(self):
+        """Cell with text-align in style attribute."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Centered'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-ta',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'text-align: center',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('text-align: center', html)
+
+    def test_cell_vertical_align(self):
+        """Cell with vertical-align in style attribute."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Top-aligned'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-va',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'vertical-align: top',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('vertical-align: top', html)
+
+    def test_cell_padding(self):
+        """Cell with padding in style attribute."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Padded'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-pd',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'padding: 10px',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('padding: 10px', html)
+
+    def test_cell_border_properties(self):
+        """Cell with full border styling."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Bordered'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-bd',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'border-style: solid; border-color: #000; border-width: 2px',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('border-style: solid', html)
+        self.assertIn('border-color: #000', html)
+        self.assertIn('border-width: 2px', html)
+
+    def test_cell_multiple_styles_combined(self):
+        """Cell with multiple style properties combined."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Full style'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-fs',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'background-color: #eee; text-align: center; vertical-align: middle; padding: 5px',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('background-color: #eee', html)
+        self.assertIn('text-align: center', html)
+        self.assertIn('vertical-align: middle', html)
+        self.assertIn('padding: 5px', html)
+
+    def test_cell_width_in_style_overrides_attribute(self):
+        """Width in style string takes precedence over discrete width attribute."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'W'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-w',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'width': '72',
+                    'style': 'width: 200px',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('width: 200px', html)
+        # Discrete width=72 should NOT appear since style has width already
+        self.assertNotIn('width: 72', html)
+
+    def test_unsafe_css_value_rejected(self):
+        """CSS values with unsafe characters are stripped."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Safe'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-xss',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'background-color: url(javascript:alert(1)); padding: 5px',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        # Safe property should be kept
+        self.assertIn('padding: 5px', html)
+        # Unsafe value should be stripped
+        self.assertNotIn('javascript', html)
+        self.assertNotIn('url(', html)
+
+    def test_unknown_css_property_rejected(self):
+        """CSS properties not in the allowlist are stripped."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Clean'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-cl',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'style': 'background-color: #fff; position: absolute; display: none',
+                },
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('background-color: #fff', html)
+        self.assertNotIn('position', html)
+        self.assertNotIn('display', html)
+
+    def test_no_style_produces_plain_td(self):
+        """Cell without any style attributes renders a plain <td>."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Plain'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-p',
+                'table-cell': {'data-row': 'row-1'},
+            }},
+        ]
+        t = _make_translator()
+        html = t.translate_to_html(ops)
+        self.assertIn('<td>', html)
+        self.assertNotIn('style=', html)
 
     def test_cell_with_all_attributes(self):
         """Cell with every possible attribute set."""
@@ -1155,7 +1342,7 @@ class TestLatexOutput(unittest.TestCase):
     """Tests for LaTeX rendering of quill-table-better tables."""
 
     def test_basic_table_latex(self):
-        """Basic table renders to LaTeX tabular environment."""
+        """Basic table renders to a longtable environment with & separators."""
         ops = [
             {'insert': '\n', 'attributes': {'table-temporary': True}},
             {'insert': 'A'},
@@ -1171,8 +1358,12 @@ class TestLatexOutput(unittest.TestCase):
         ]
         t = _make_translator()
         latex = t.translate_to_latex(ops)
-        self.assertIn(r'\begin{tabular}', latex)
-        self.assertIn(r'\end{tabular}', latex)
+        self.assertIn(r'\begin{longtable}', latex)
+        self.assertIn(r'\end{longtable}', latex)
+        # p{...\linewidth} column spec
+        self.assertIn(r'\linewidth', latex)
+        # The two cells are separated by an &
+        self.assertIn('&', latex)
         self.assertIn('A', latex)
         self.assertIn('B', latex)
 
@@ -1427,7 +1618,10 @@ class TestCellBlockRealWorldFormat(unittest.TestCase):
         t = _make_translator()
         html = t.translate_to_html(ops)
         self.assertEqual(html.count('<tr>'), 2)
-        self.assertEqual(html.count('<td>'), 6)
+        self.assertEqual(html.count('<td'), 6)
+        # Cells should have width/height styles
+        self.assertIn('width: 72', html)
+        self.assertIn('height: 24', html)
         for text in ('Name', 'Age', 'City', 'Alice', '30', 'London'):
             self.assertIn(text, html)
 
@@ -1621,6 +1815,107 @@ class TestModuleRegistration(unittest.TestCase):
         doc = t.ops_to_internal_representation(ops)
         table_blocks = [b for b in doc.contents if isinstance(b, TableBetter2Block)]
         self.assertEqual(len(table_blocks), 1)
+
+
+class TestStripTableCellStyle(unittest.TestCase):
+    """Tests for the strip_table_cell_style setting."""
+
+    _STYLED_OPS = [
+        {'insert': '\n', 'attributes': {
+            'table-temporary': {
+                'style': 'width: 100%; border-collapse: collapse',
+                'border': '1',
+                'data-class': 'ql-table-better',
+            }
+        }},
+        {'insert': 'Cell A'},
+        {'insert': '\n', 'attributes': {
+            'table-cell-block': 'cell-a',
+            'table-cell': {
+                'data-row': 'row-1',
+                'width': '150',
+                'style': 'background-color: #ffc; text-align: center',
+            },
+        }},
+        {'insert': 'Cell B'},
+        {'insert': '\n', 'attributes': {
+            'table-cell-block': 'cell-b',
+            'table-cell': {
+                'data-row': 'row-1',
+                'style': 'vertical-align: top; padding: 8px',
+            },
+        }},
+    ]
+
+    def test_default_preserves_style(self):
+        """By default, cell and table styles are rendered."""
+        t = _make_translator()
+        html = t.translate_to_html(self._STYLED_OPS)
+        # Table-level styling
+        self.assertIn('class="ql-table-better"', html)
+        self.assertIn('border="1"', html)
+        self.assertIn('width: 100%', html)
+        # Cell-level styling
+        self.assertIn('background-color: #ffc', html)
+        self.assertIn('text-align: center', html)
+        self.assertIn('vertical-align: top', html)
+        self.assertIn('padding: 8px', html)
+        self.assertIn('width: 150', html)
+
+    def test_strip_removes_all_style(self):
+        """With strip_table_cell_style=True, all styling is removed."""
+        t = _make_translator()
+        t.settings['strip_table_cell_style'] = True
+        html = t.translate_to_html(self._STYLED_OPS)
+        # Table tag should be plain
+        self.assertIn('<table>', html)
+        self.assertNotIn('class=', html)
+        self.assertNotIn('border=', html)
+        # Cell tags should be plain
+        self.assertIn('<td>', html)
+        self.assertNotIn('style=', html)
+        self.assertNotIn('background-color', html)
+        # Content should still be there
+        self.assertIn('Cell A', html)
+        self.assertIn('Cell B', html)
+
+    def test_strip_preserves_colspan_rowspan(self):
+        """Stripping styles does NOT strip structural attributes (colspan/rowspan)."""
+        ops = [
+            {'insert': '\n', 'attributes': {'table-temporary': True}},
+            {'insert': 'Wide'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-w',
+                'table-cell': {
+                    'data-row': 'row-1',
+                    'colspan': '2',
+                    'style': 'background-color: #f00',
+                },
+            }},
+            {'insert': 'A'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-a',
+                'table-cell': {'data-row': 'row-2'},
+            }},
+            {'insert': 'B'},
+            {'insert': '\n', 'attributes': {
+                'table-cell-block': 'cell-b',
+                'table-cell': {'data-row': 'row-2'},
+            }},
+        ]
+        t = _make_translator()
+        t.settings['strip_table_cell_style'] = True
+        html = t.translate_to_html(ops)
+        # Colspan must survive stripping
+        self.assertIn('colspan="2"', html)
+        # Style should be gone
+        self.assertNotIn('background-color', html)
+        self.assertNotIn('style=', html)
+
+    def test_strip_setting_false_by_default(self):
+        """Verify the default value is False."""
+        t = _make_translator()
+        self.assertFalse(t.settings.get('strip_table_cell_style', False))
 
 
 if __name__ == '__main__':

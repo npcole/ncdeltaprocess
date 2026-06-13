@@ -7,6 +7,7 @@ Required LaTeX packages::
 
     \\usepackage{hyperref}          % \\href, \\hyperlink, \\hypertarget
     \\usepackage[normalem]{ulem}    % \\sout (strikethrough)
+    \\usepackage{changes}           % \\added, \\deleted, \\highlight (diff markup)
 """
 
 from __future__ import annotations
@@ -20,7 +21,49 @@ if TYPE_CHECKING:
     from .node import TextLine
 
 try:
-    from pylatexenc.latexencode import unicode_to_latex
+    from pylatexenc.latexencode import (
+        UnicodeToLatexEncoder,
+        UnicodeToLatexConversionRule,
+        RULE_DICT,
+    )
+
+    # Extra mappings for characters pylatexenc doesn't know about.
+    # Rendered using textcomp or math-mode equivalents that work with
+    # standard pdflatex + utf8 inputenc.
+    _EXTRA_LATEX_CHARS = {
+        ord('₵'): r'\textcent{}',          # ₵ Ghanaian cedi sign (closest available)
+        ord('₦'): r'N\hspace{-0.3em}=',    # ₦ Nigerian naira sign
+        ord('₱'): r'P\hspace{-0.3em}=',    # ₱ Philippine peso sign
+        ord('₺'): r'TL',                    # ₺ Turkish lira sign
+        ord('₹'): r'Rs',                    # ₹ Indian rupee sign
+        ord('₫'): r'\dj{}',                 # ₫ Vietnamese dong sign
+        ord('₿'): r'BTC',                   # ₿ Bitcoin sign
+        ord('•'): r'\textbullet{}',         # • bullet
+        ord('–'): r'\textendash{}',         # – en dash
+        ord('—'): r'\textemdash{}',         # — em dash
+        ord('‘'): r'\textquoteleft{}',      # ' left single quote
+        ord('’'): r'\textquoteright{}',     # ' right single quote
+        ord('“'): r'\textquotedblleft{}',   # " left double quote
+        ord('”'): r'\textquotedblright{}',  # " right double quote
+        ord('…'): r'\ldots{}',              # … ellipsis
+        ord(' '): r'~',                     # non-breaking space
+    }
+
+    _encoder = UnicodeToLatexEncoder(
+        conversion_rules=[
+            UnicodeToLatexConversionRule(
+                rule_type=RULE_DICT,
+                rule=_EXTRA_LATEX_CHARS,
+            ),
+            'defaults',
+        ],
+        unknown_char_policy='replace',
+        unknown_char_warning=True,
+    )
+
+    def unicode_to_latex(text: str) -> str:
+        return _encoder.unicode_to_latex(text)
+
 except ImportError:
     def unicode_to_latex(text: str) -> str:
         """Fallback LaTeX escaping when pylatexenc is not installed."""
@@ -81,9 +124,31 @@ class LineRenderLaTeX(object):
         'sans-serif': r'\textsf',
     }
 
+    # Maps ncquill_diff / quill_diff attribute values to LaTeX commands
+    # from the ``changes`` package. ``\hspace{0pt}`` after the closing
+    # brace inserts a zero-width breakpoint so adjacent diff commands
+    # don't merge visually, without adding any visible space before
+    # punctuation.
+    diff_commands: dict[str, tuple[str, str]] = {
+        'new': (r'\added{', r'}\hspace{0pt}'),
+        'insert': (r'\added{', r'}\hspace{0pt}'),
+        'removed': (r'\deleted{', r'}\hspace{0pt}'),
+        'delete': (r'\deleted{', r'}\hspace{0pt}'),
+        'edited': (r'\highlight{', r'}\hspace{0pt}'),
+    }
+
     def pre_process_line(self, text_line: str) -> str:
-        """Escape a plain text string for safe inclusion in LaTeX."""
-        return unicode_to_latex(text_line)
+        """Escape a plain text string for safe inclusion in LaTeX.
+
+        After ``unicode_to_latex`` handles standard escaping, square
+        brackets are protected: ``[`` → ``{[}`` and ``]`` → ``{]}``.
+        This prevents LaTeX from interpreting ``[...]`` in body text as
+        an optional argument to a preceding command (``\\par``,
+        ``\\noindent``, ``\\\\``, ``\\item``, etc.).
+        """
+        result = unicode_to_latex(text_line)
+        result = result.replace('[', '{[}').replace(']', '{]}')
+        return result
 
     def process_line_with_attributes(self, text_line: str) -> str:
         """Convert a text run to LaTeX, wrapping with commands for active attributes."""
@@ -124,5 +189,12 @@ class LineRenderLaTeX(object):
         if anchor:
             safe_anchor = sanitize_latex_label(anchor)
             output = r'\hypertarget{' + safe_anchor + r'}{}' + output
+
+        # Diff markup (ncquill_diff or quill_diff attributes). Applied
+        # last so it wraps all other formatting.
+        diff_val = attrs.get('ncquill_diff') or attrs.get('quill_diff')
+        if diff_val and diff_val in self.diff_commands:
+            open_cmd, close_cmd = self.diff_commands[diff_val]
+            output = open_cmd + output + close_cmd
 
         return output

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    'Node', 'TextLine', 'Image', 'DividerNode',
+    'Node', 'TextLine', 'Image', 'DividerNode', 'SoftBreakNode',
     'AnnotationMarkerNode', 'FootnoteMarkerNode',
 ]
 
@@ -119,6 +119,21 @@ class DividerNode(RenderMixin, Node):
 
     def render_contents_latex(self, output: OutputObject) -> str:
         return r'\noindent\rule{\textwidth}{0.4pt}'
+
+
+class SoftBreakNode(RenderMixin, Node):
+    """Renders a soft line break within a block.
+
+    Produced from ``{'insert': {'softbreak': True}}`` embeds. Renders as
+    ``<br>`` in HTML and ``\\\\`` in LaTeX, creating a visual line
+    break without starting a new block or section.
+    """
+
+    def render_contents_html(self, output: OutputObject) -> str:
+        return '<br>'
+
+    def render_contents_latex(self, output: OutputObject) -> str:
+        return '\\\\\n'
 
 
 class AnnotationMarkerNode(RenderMixin, Node):

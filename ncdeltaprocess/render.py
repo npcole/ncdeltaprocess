@@ -44,16 +44,31 @@ class RenderMixin(object):
         }
     }
 
-    def render_tree(self, mode: str = 'html') -> str:
+    def render_tree(
+        self,
+        mode: str = 'html',
+        heading_base_level: int | None = None,
+    ) -> str:
         """A non-recursive way to render the tree.
 
         Uses set-based visited tracking with id() for O(1) lookups
         and cycle detection to prevent infinite loops.
+
+        Args:
+            mode: ``'html'`` or ``'latex'``.
+            heading_base_level: If set, offset applied to heading levels
+                in the output. For example, ``heading_base_level=3``
+                maps h1→h4 in HTML and h1→``\\paragraph`` in LaTeX.
+                Useful for embedding document content inside a larger
+                report without clashing with the report's section
+                numbering.
         """
         open_block_call = self.modes[mode]['open_block']
         render_call = self.modes[mode]['render_block']
         close_block_call = self.modes[mode]['close_block']
         output = self.modes[mode]['output_object']()
+        if heading_base_level is not None:
+            output.heading_base_level = heading_base_level
 
         stack: list[RenderMixin] = []
         already_visited: set[int] = set()

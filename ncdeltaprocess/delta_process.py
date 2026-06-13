@@ -9,6 +9,7 @@ from . import node
 from .modules.annotations import AnnotationModule
 from .modules.divider import DividerModule
 from .modules.lists import ListModule
+from .modules.softbreak import SoftBreakModule
 from .modules.table_quill2 import TableQuill2Module
 from .modules.table_better_table import BetterTableModule
 from .modules.table_better import TableBetterModule
@@ -97,11 +98,23 @@ class TranslatorBase(object):
                 target.append(getattr(module, proc_name))
         return module
 
-    def translate_to_html(self, delta_ops: list[DeltaOp]) -> str:
-        return self.ops_to_internal_representation(delta_ops).render_tree()
+    def translate_to_html(
+        self,
+        delta_ops: list[DeltaOp],
+        heading_base_level: int | None = None,
+    ) -> str:
+        return self.ops_to_internal_representation(delta_ops).render_tree(
+            mode='html', heading_base_level=heading_base_level,
+        )
 
-    def translate_to_latex(self, delta_ops: list[DeltaOp]) -> str:
-        return self.ops_to_internal_representation(delta_ops).render_tree(mode='latex')
+    def translate_to_latex(
+        self,
+        delta_ops: list[DeltaOp],
+        heading_base_level: int | None = None,
+    ) -> str:
+        return self.ops_to_internal_representation(delta_ops).render_tree(
+            mode='latex', heading_base_level=heading_base_level,
+        )
 
     def ops_to_internal_representation(
         self,
@@ -315,6 +328,7 @@ class TranslatorQuillJS(TranslatorBase):
         self.add_module(ListModule)
         self.add_module(AnnotationModule)
         self.add_module(DividerModule)
+        self.add_module(SoftBreakModule)
         self.add_module(TableQuill2Module)
         self.add_module(BetterTableModule)
         self.add_module(TableBetterModule)

@@ -12,13 +12,45 @@ from the first row's cells.
 
 from __future__ import annotations
 
+import html as _html
+import re
 import weakref
 from typing import Any
 from ..block import RenderOpenCloseMixin, Block, TextBlockParagraph
 from ..document import QDocument
 from ..render import OutputObject
+from ..sanitize import CSS_SAFE_PATTERN
 from . import ModuleBase
 from typing import NamedTuple
+
+# CSS properties allowed on table cells.
+_CELL_STYLE_ALLOWLIST: frozenset[str] = frozenset({
+    'background-color', 'border-style', 'border-color', 'border-width',
+    'border', 'border-top', 'border-bottom', 'border-left', 'border-right',
+    'padding', 'text-align', 'vertical-align', 'width', 'height',
+})
+
+# CSS properties allowed on the table element.
+_TABLE_STYLE_ALLOWLIST: frozenset[str] = frozenset({
+    'width', 'height', 'border-style', 'border-color', 'border-width',
+    'border', 'border-collapse', 'background-color',
+    'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
+})
+
+
+def _sanitize_style(raw_style: str, allowlist: frozenset[str]) -> str:
+    """Parse an inline CSS string, keep only allowed properties with safe values."""
+    parts: list[str] = []
+    for declaration in raw_style.split(';'):
+        declaration = declaration.strip()
+        if not declaration or ':' not in declaration:
+            continue
+        prop, _, value = declaration.partition(':')
+        prop = prop.strip().lower()
+        value = value.strip()
+        if prop in allowlist and CSS_SAFE_PATTERN.match(value):
+            parts.append(f'{_html.escape(prop, quote=True)}: {_html.escape(value, quote=True)}')
+    return '; '.join(parts)
 
 
 class CellInfo(NamedTuple):
@@ -26,6 +58,7 @@ class CellInfo(NamedTuple):
     row_id: str
     col_span: int | None
     row_span: int | None
+    cell_style: dict[str, Any] | None = None
 
 
 class ColumnInfo(NamedTuple):
@@ -41,6 +74,7 @@ class TableBetterModule(ModuleBase):
     settings: dict[str, Any] = {
         'list_text_blocks_are_p': True,
         'list_better_table_cells_are_p': True,
+        'strip_table_cell_style': False,
     }
 
     def new_table_test(
@@ -67,27 +101,33 @@ class TableBetterModule(ModuleBase):
     def _get_cell_details(self, qblock: dict[str, Any]) -> CellInfo:
         """Extract cell metadata from block attributes."""
         attributes = qblock['attributes']
+        table_cell = attributes['table-cell']
         if 'table-header' in attributes:
             cell_id = attributes['table-header']['cellId']
-            row_id = attributes['table-cell']['data-row']
+            row_id = table_cell['data-row']
             col_span = attributes['table-header'].get('colspan', None)
             row_span = attributes['table-header'].get('rowspan', None)
         elif 'table-list' in attributes:
             cell_id = attributes['table-list-container']['cellId']
-            row_id = attributes['table-cell']['data-row']
+            row_id = table_cell['data-row']
             col_span = attributes['table-list-container'].get('colspan', None)
             row_span = attributes['table-list-container'].get('rowspan', None)
         else:
             cell_id = attributes['table-cell-block']
-            row_id = attributes['table-cell']['data-row']
-            col_span = attributes['table-cell'].get('colspan', None)
-            row_span = attributes['table-cell'].get('rowspan', None)
+            row_id = table_cell['data-row']
+            col_span = table_cell.get('colspan', None)
+            row_span = table_cell.get('rowspan', None)
+
+        # Collect style-relevant attributes from the table-cell dict.
+        cell_style = {k: v for k, v in table_cell.items()
+                      if k not in ('data-row', 'colspan', 'rowspan')}
 
         return CellInfo(
             cell_id=cell_id,
             row_id=row_id,
             col_span=col_span,
             row_span=row_span,
+            cell_style=cell_style or None,
         )
 
     def _get_cell_block(
@@ -97,13 +137,16 @@ class TableBetterModule(ModuleBase):
         previous_block: Block,
     ) -> TableBetter2CellBlock:
         """Get or create the cell block for the given cell info."""
+        strip = self.parent.settings.get('strip_table_cell_style', False)
+        cell_kw: dict[str, Any] = {
+            'col_span': cell_info.col_span,
+            'row_span': cell_info.row_span,
+            'cell_style': None if strip else cell_info.cell_style,
+        }
+
         if isinstance(previous_block, TableBetter2Block):
             new_row = previous_block.add_row(cell_info.row_id)
-            previous_cell = new_row.add_cell(
-                cell_info.cell_id,
-                col_span=cell_info.col_span,
-                row_span=cell_info.row_span,
-            )
+            previous_cell = new_row.add_cell(cell_info.cell_id, **cell_kw)
         elif isinstance(previous_block, TableBetter2CellBlock):
             previous_cell = previous_block
         else:
@@ -125,18 +168,10 @@ class TableBetterModule(ModuleBase):
             return previous_cell
         # Same row?
         if cell_info.row_id == previous_cell.row_id:
-            return previous_cell.parent.add_cell(
-                cell_info.cell_id,
-                col_span=cell_info.col_span,
-                row_span=cell_info.row_span,
-            )
+            return previous_cell.parent.add_cell(cell_info.cell_id, **cell_kw)
         # New row
         this_row = previous_cell.find_ancestor(TableBetter2Block).add_row(cell_info.row_id)
-        return this_row.add_cell(
-            cell_info.cell_id,
-            col_span=cell_info.col_span,
-            row_span=cell_info.row_span,
-        )
+        return this_row.add_cell(cell_info.cell_id, **cell_kw)
 
     def create_better_table_cell(
         self, qblock: dict[str, Any], this_document: QDocument, previous_block: Block | None,
@@ -196,7 +231,11 @@ class TableBetterModule(ModuleBase):
             new_block = contents_block
 
         else:
-            new_block = TextBlockParagraph(
+            if self.parent.settings.get('list_better_table_cells_are_p', True):
+                CELL_BLOCK: type[Block] = TextBlockParagraph
+            else:
+                CELL_BLOCK = Block
+            new_block = CELL_BLOCK(
                 parent=this_cell,
                 last_block=previous_block,
             )
@@ -244,20 +283,68 @@ class TableBetter2Block(RenderOpenCloseMixin, Block):
     def _columns(self) -> list[ColumnInfo]:
         return self.get_columns()
 
+    def _get_table_attrs(self) -> dict[str, Any]:
+        """Return the table-temporary dict, handling both dict and bare True."""
+        raw = self.attributes.get('table-temporary', {})
+        if isinstance(raw, dict):
+            return raw
+        return {}
+
+    def _is_style_stripped(self) -> bool:
+        """Check whether table/cell styling should be suppressed."""
+        doc = self.parent
+        if hasattr(doc, 'settings'):
+            return doc.settings.get('strip_table_cell_style', False)
+        return False
+
     def open_tag(self, output_object: OutputObject) -> str:
+        if self._is_style_stripped():
+            return '<table>'
+
+        table_attrs = self._get_table_attrs()
+        html_attrs: list[str] = []
+
+        # CSS class from data-class.
+        css_class = table_attrs.get('data-class')
+        if css_class and CSS_SAFE_PATTERN.match(str(css_class)):
+            html_attrs.append(f'class="{_html.escape(str(css_class), quote=True)}"')
+
+        # border / cellspacing HTML attributes.
+        for attr in ('border', 'cellspacing'):
+            val = table_attrs.get(attr)
+            if val is not None and re.match(r'^\d+$', str(val)):
+                html_attrs.append(f'{attr}="{_html.escape(str(val), quote=True)}"')
+
+        # Inline style.
+        raw_style = table_attrs.get('style', '')
+        if raw_style:
+            sanitized = _sanitize_style(str(raw_style), _TABLE_STYLE_ALLOWLIST)
+            if sanitized:
+                html_attrs.append(f'style="{sanitized}"')
+
+        if html_attrs:
+            return '<table ' + ' '.join(html_attrs) + '>'
         return '<table>'
 
     def close_tag(self, output_object: OutputObject) -> str:
         return '</table>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        cols = '|'.join('c' for _ in self._columns)
+        n = len(self._columns) or 1
+        # Equal-width wrapping columns that share \linewidth; longtable
+        # allows the table to break across pages.
+        col_width = f'{0.9 / n:.2f}\\linewidth'
+        cols = '|'.join(f'p{{{col_width}}}' for _ in range(n))
         if cols:
             cols = '|' + cols + '|'
-        return r'\begin{tabular}{' + cols + r'} \hline'
+        return (
+            r'\par\medskip' '\n'
+            r'\begin{longtable}{' + cols + r'}' '\n'
+            r'\hline' '\n'
+        )
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\end{tabular}'
+        return r'\end{longtable}' '\n' r'\medskip' '\n'
 
 
 class TableBetter2RowBlock(RenderOpenCloseMixin, Block):
@@ -287,7 +374,7 @@ class TableBetter2RowBlock(RenderOpenCloseMixin, Block):
         return '</%s>' % self.get_tag()
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\\ \hline'
+        return r' \\' '\n' r'\hline' '\n'
 
 
 class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
@@ -298,6 +385,7 @@ class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
         cell_id: str,
         row_span: int | str | None = None,
         col_span: int | str | None = None,
+        cell_style: dict[str, Any] | None = None,
         *args: Any,
         **keywords: Any,
     ) -> None:
@@ -306,14 +394,58 @@ class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
         self.cell_id: str = cell_id
         self.row_span: int | None = int(row_span) if row_span is not None else None
         self.col_span: int | None = int(col_span) if col_span is not None else None
+        self.cell_style: dict[str, Any] = cell_style or {}
+
+    def _build_style(self) -> str:
+        """Build a sanitized inline style string from cell attributes."""
+        parts: list[str] = []
+
+        # Explicit style string from the table-cell dict.
+        raw = self.cell_style.get('style', '')
+        if raw:
+            sanitized = _sanitize_style(str(raw), _CELL_STYLE_ALLOWLIST)
+            if sanitized:
+                parts.append(sanitized)
+
+        # Discrete width/height attributes (only if not already in style).
+        existing = '; '.join(parts).lower()
+        for prop in ('width', 'height'):
+            if prop not in existing:
+                val = self.cell_style.get(prop)
+                if val and CSS_SAFE_PATTERN.match(str(val)):
+                    parts.append(f'{prop}: {_html.escape(str(val), quote=True)}')
+
+        return '; '.join(parts)
 
     def open_tag(self, output_object: OutputObject) -> str:
-        row_span = f' rowspan="{self.row_span}"' if (self.row_span and self.row_span != 1) else ''
-        col_span = f' colspan="{self.col_span}"' if (self.col_span and self.col_span != 1) else ''
-        return f'<td{row_span}{col_span}>'
+        attrs: list[str] = []
+        if self.row_span and self.row_span != 1:
+            attrs.append(f'rowspan="{self.row_span}"')
+        if self.col_span and self.col_span != 1:
+            attrs.append(f'colspan="{self.col_span}"')
+        style = self._build_style()
+        if style:
+            attrs.append(f'style="{style}"')
+        if attrs:
+            return '<td ' + ' '.join(attrs) + '>'
+        return '<td>'
 
     def close_tag(self, output_object: OutputObject) -> str:
         return '</td>'
+
+    def open_latex(self, output_object: OutputObject) -> str:
+        # Emit '& ' separator before every cell except the first in the row.
+        parent = self.parent
+        if parent is not None and hasattr(parent, 'contents'):
+            for sibling in parent.contents:
+                if isinstance(sibling, TableBetter2CellBlock):
+                    if sibling is self:
+                        return ''  # first cell — no separator
+                    break
+        return ' & '
+
+    def close_latex(self, output_object: OutputObject) -> str:
+        return ''
 
 
 class TableBetter2CellHeadingBlock(RenderOpenCloseMixin, Block):
