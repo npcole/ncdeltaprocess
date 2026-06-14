@@ -49,6 +49,27 @@ html = doc.render_tree()
 latex = doc.render_tree(mode='latex')
 ```
 
+### Embedding inside another document
+
+When a Delta document is rendered inside a larger report (an article
+with its own section numbering, say), its h1/h2 headings will clash
+with the host structure. Pass `heading_base_level=N` to shift every
+heading down by N levels:
+
+```python
+# h1 → h4, h2 → h5 (HTML); h1 → \paragraph, h2 → \subparagraph (LaTeX)
+html = t.translate_to_html(ops, heading_base_level=3)
+latex = t.translate_to_latex(ops, heading_base_level=3)
+
+# Same shape if you're working with the document tree directly:
+html = doc.render_tree(mode='html', heading_base_level=3)
+```
+
+In HTML the offset is clamped at `h6`. In LaTeX it walks the natural
+`\section` → `\subsection` → `\subsubsection` → `\paragraph` →
+`\subparagraph` chain, falling back to `\textbf{...}` for anything
+deeper.
+
 ## Supported Formats
 
 **Block types:** paragraphs, headings (h1-h6), code blocks, blockquotes,
@@ -63,8 +84,20 @@ background colour.
 - quill-better-table (column defs + `table-cell-line` with row/cell IDs)
 - quill-table-better (style-based with headers and in-cell lists)
 
+In LaTeX, tables render as `longtable` environments with
+`p{...\linewidth}` columns so they break across pages and wrap long
+content. Include `\usepackage{longtable}` in your preamble.
+
 **Annotations and footnotes:** annotation markers render inline content;
 footnote markers generate numbered references with end-matter blocks.
+Multi-block annotation content keeps its line structure when inlined
+into a marker span or LaTeX `\footnote{...}` — consecutive bare-plain
+blocks are joined with `<br>` (HTML) or `\\` (LaTeX).
+
+**Soft breaks:** `{'insert': {'softbreak': True}}` embeds render as
+`<br>` in HTML and `\\` in LaTeX, giving a visual line break inside a
+single block (e.g. a multi-line heading) without starting a new
+section.
 
 **Output modes:** HTML (default) and LaTeX.
 
@@ -118,6 +151,21 @@ from ncdeltaprocess import TranslatorQuillJS
 
 t = TranslatorQuillJS()
 t.add_module(MyModule)
+```
+
+If the module needs per-instance state (such as a config object or a
+set of event ids), pass extra keyword arguments to `add_module` —
+they're forwarded to the module's constructor. `add_module` returns
+the instantiated module so callers can hold a reference:
+
+```python
+class MyModule(ModuleBase):
+    def __init__(self, parent, target_class='highlight'):
+        super().__init__(parent=parent)
+        self.target_class = target_class
+
+t = TranslatorQuillJS()
+module = t.add_module(MyModule, target_class='callout')
 ```
 
 ### Block tests and factories
@@ -304,10 +352,116 @@ html = t.translate_to_html([
 # → '<div class="callout callout-warning">Watch out!</div>'
 ```
 
+### Text-run post-processors
+
+Some modules don't add new block or node types — they wrap or annotate
+*every* text run in the document. Examples: a diff-marker pass that
+wraps inserted/deleted runs in coloured spans, a search-highlighter
+that wraps matched runs in `<mark>`, an attribution overlay that emits
+tooltip-ready spans showing who wrote each fragment.
+
+`ModuleBase` exposes two list attributes for this:
+
+```python
+class HighlightModule(ModuleBase):
+    html_text_post_processors: list[str] = ['highlight_html']
+    latex_text_post_processors: list[str] = ['highlight_latex']
+
+    def __init__(self, parent, term=''):
+        super().__init__(parent=parent)
+        self.term = term
+
+    def highlight_html(self, node, current_output):
+        if self.term and self.term in node.contents:
+            return f'<mark>{current_output}</mark>'
+        return current_output
+
+    def highlight_latex(self, node, current_output):
+        if self.term and self.term in node.contents:
+            return r'\hl{' + current_output + r'}'
+        return current_output
+```
+
+Each post-processor takes `(text_line, current_output)` and returns a
+new `current_output` string. They run *after* the renderer's built-in
+pipeline (escape, inline styles, links), so the output they receive is
+already valid HTML/LaTeX.
+
+Modules' post-processors chain in registration order — multiple
+text-modifier modules can co-exist on the same translator, and the
+processor added last wraps the output of the one added first. Modules
+that need per-node state (cached event ids, accepted-amendment sets,
+etc.) can override `configure_text_line(text_line)` — it's called once
+for each `TextLine` the translator creates.
+
 ### Built-in modules
 
-`ListModule`, `AnnotationModule`, `DividerModule`, `TableQuill2Module`,
-`BetterTableModule`, `TableBetterModule`.
+`ListModule`, `AnnotationModule`, `DividerModule`, `SoftBreakModule`,
+`TableQuill2Module`, `BetterTableModule`, `TableBetterModule`.
+
+## LaTeX output
+
+### Required packages
+
+Add these to your document preamble for the full feature set:
+
+```latex
+\usepackage{hyperref}            % \href, \hyperlink, \hypertarget
+\usepackage[normalem]{ulem}      % \sout (strikethrough)
+\usepackage{longtable}           % paginated tables
+\usepackage{changes}             % \added, \deleted, \highlight (diff markup)
+\usepackage[utf8]{inputenc}      % unicode text
+```
+
+`pylatexenc` is the recommended Unicode-to-LaTeX encoder:
+
+```bash
+pip install ncdeltaprocess[latex]
+```
+
+Without it, the renderer falls back to a minimal escaper that handles
+the standard LaTeX special characters but doesn't know about
+characters like smart quotes, em-dashes, currency symbols or the
+non-breaking space.
+
+### Aligned headings
+
+A heading with an `align` attribute (`center` / `left` / `right`)
+renders inside the matching flush environment with an explicit font
+size + `\bfseries`, *not* as a sectioning command. Aligned `\section`
+fights the alignment env with its own large vertical spacing; using
+font-sizing keeps the visual alignment clean:
+
+```python
+ops = [
+    {'insert': 'CHAPTER ONE'},
+    {'insert': '\n', 'attributes': {'header': 1, 'align': 'center'}},
+]
+# → \begin{center}{\Large\bfseries CHAPTER ONE}\end{center}
+```
+
+Unaligned headings still use the regular `\section{...}` chain.
+
+### Diff markup
+
+If a run carries an `ncquill_diff` or `quill_diff` attribute, it gets
+wrapped in a `changes`-package command:
+
+| Attribute value | LaTeX command |
+| --------------- | ------------- |
+| `'new'` / `'insert'`      | `\added{...}` |
+| `'removed'` / `'delete'`  | `\deleted{...}` |
+| `'edited'`                | `\highlight{...}` |
+
+The wrapping is applied last, so it sits outside any other inline
+formatting (`\textbf`, `\href`, etc.). Requires `\usepackage{changes}`
+in the preamble.
+
+### Bracket protection
+
+Square brackets in body text are wrapped `{[}` / `{]}` automatically.
+This prevents LaTeX from misreading body-text `[...]` as an optional
+argument to a preceding `\par`, `\\`, `\item`, `\noindent` etc.
 
 ## Security
 
