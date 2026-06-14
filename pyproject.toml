@@ -4,21 +4,36 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ncdeltaprocess"
-version = "0.1"
-description = "A processor for Quilljs Delta Files."
+version = "1.0.1"
+description = "A processor for QuillJS Delta files, rendering to HTML and LaTeX."
+readme = "README.md"
 license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [
     { name = "Nicholas Cole", email = "n@npcole.com" },
 ]
-urls.Homepage = "http://www.quillproject.net/"
+keywords = ["quill", "quilljs", "delta", "html", "latex", "rich-text"]
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: LaTeX",
 ]
+
+[project.urls]
+Homepage = "http://www.quillproject.net/"
+Repository = "https://github.com/npcole/ncdeltaprocess"
+Issues = "https://github.com/npcole/ncdeltaprocess/issues"
 
 [project.optional-dependencies]
 latex = ["pylatexenc"]
 
-[tool.setuptools]
-packages = { find = {} }
+[tool.setuptools.packages.find]
+include = ["ncdeltaprocess*"]
