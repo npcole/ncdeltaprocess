@@ -112,9 +112,11 @@ class TranslatorBase(object):
         delta_ops: list[DeltaOp],
         heading_base_level: int | None = None,
     ) -> str:
-        return self.ops_to_internal_representation(delta_ops).render_tree(
+        from .latex_line_render import merge_adjacent_inline_styles
+        latex = self.ops_to_internal_representation(delta_ops).render_tree(
             mode='latex', heading_base_level=heading_base_level,
         )
+        return merge_adjacent_inline_styles(latex)
 
     def ops_to_internal_representation(
         self,

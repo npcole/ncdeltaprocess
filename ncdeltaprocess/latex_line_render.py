@@ -12,6 +12,7 @@ Required LaTeX packages::
 
 from __future__ import annotations
 
+import re
 import weakref
 from typing import TYPE_CHECKING
 
@@ -112,7 +113,11 @@ class LineRenderLaTeX(object):
         'italic': (r'\emph{', r'}'),
         'bold': (r'\textbf{', r'}'),
         'strike': (r'\sout{', r'}'),
-        'underline': (r'\underline{', r'}'),
+        # \uline (ulem) underlines at a fixed depth regardless of descenders and
+        # breaks across lines — unlike \underline, which sits at a different
+        # height per word and overflows the margin. Requires
+        # \usepackage[normalem]{ulem} in the document preamble.
+        'underline': (r'\uline{', r'}'),
     }
 
     script_styles: dict[str, tuple[str, str]] = {
@@ -203,3 +208,34 @@ class LineRenderLaTeX(object):
             output = open_cmd + output + close_cmd
 
         return output
+
+
+# Inline-style commands whose adjacent groups should read as one continuous run.
+# A Quill delta often fragments a styled phrase across several ops (e.g.
+# "ex post facto" as three underlined ops), which renders as
+# ``\uline{ex} \uline{post} \uline{facto}`` — choppy per-word styling with the
+# inter-word spaces left *outside* the rule. ``merge_adjacent_inline_styles``
+# folds such neighbours, separated only by whitespace or a ``~`` tie, back
+# together so they render continuously.
+_INLINE_MERGE_CMDS = ('uline', 'emph', 'textbf', 'sout')
+
+
+def merge_adjacent_inline_styles(latex: str) -> str:
+    """Merge adjacent identical inline-style groups separated only by
+    whitespace, so a run-fragmented styled phrase renders as one run.
+
+    Conservative by design: only folds neighbours with the *same* command and
+    brace-free content (so nested commands like ``\\uline{\\textbf{x}}`` and
+    runs separated by real text are left untouched), and never touches the diff
+    commands (``\\added`` / ``\\deleted``).
+    """
+    if not latex:
+        return latex
+    for cmd in _INLINE_MERGE_CMDS:
+        pattern = re.compile(
+            r'\\' + cmd + r'\{([^{}]*)\}([ ~\t]+)\\' + cmd + r'\{([^{}]*)\}')
+        prev = None
+        while prev != latex:           # fold runs of three or more
+            prev = latex
+            latex = pattern.sub(r'\\' + cmd + r'{\1\2\3}', latex)
+    return latex
