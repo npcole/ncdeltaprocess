@@ -116,6 +116,7 @@ class TranslatorBase(object):
         latex = self.ops_to_internal_representation(delta_ops).render_tree(
             mode='latex', heading_base_level=heading_base_level,
         )
+        # render_tree already folds run-fragmented diff markup for latex mode.
         return merge_adjacent_inline_styles(latex)
 
     def ops_to_internal_representation(

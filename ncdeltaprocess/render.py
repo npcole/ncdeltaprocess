@@ -95,7 +95,15 @@ class RenderMixin(object):
                     stack.append((this_node, True))
                 for c in reversed(this_node.contents):
                     stack.append((c, False))
-        return output.merge()
+        result = output.merge()
+        if mode == 'latex':
+            # Fold run-fragmented diff markup so a heavily-changed document
+            # doesn't emit thousands of separate, slow changes-package commands
+            # (\added/\deleted) — which bloat the LaTeX and can make it
+            # compile-bound. No-op when there is no diff markup.
+            from .latex_line_render import merge_adjacent_diff_commands
+            result = merge_adjacent_diff_commands(result)
+        return result
 
 
 class RenderOpenCloseMixin(RenderMixin):
