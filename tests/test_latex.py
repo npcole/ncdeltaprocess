@@ -68,7 +68,9 @@ class TestLatexInline(unittest.TestCase):
         ]
         t = TranslatorQuillJS()
         latex = t.translate_to_latex(ops)
-        self.assertIn(r'\underline{', latex)
+        # Underline renders via ulem's \uline (fixed depth, line-break friendly),
+        # not \underline — see commit "Consistent underline rendering".
+        self.assertIn(r'\uline{', latex)
 
     def test_strike(self):
         ops = [
