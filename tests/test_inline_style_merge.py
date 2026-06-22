@@ -68,63 +68,66 @@ class TestTranslatorIntegration(unittest.TestCase):
 
 
 from ncdeltaprocess.latex_line_render import (  # noqa: E402
-    strip_empty_diff_commands as strip_empty,
-    merge_adjacent_diff_commands as merge_diff,
     pair_adjacent_diff_replacements as pair_repl,
+)
+from ncdeltaprocess.delta_process import (  # noqa: E402
+    coalesce_adjacent_string_ops as coalesce,
 )
 
 H = r'\hspace{0pt}'
 
 
-class TestStripEmptyDiffCommands(unittest.TestCase):
-    """Empty change markers render nothing but each is still a changes-package
-    call — strip them."""
+class TestCoalesceAdjacentStringOps(unittest.TestCase):
+    """Op-level same-status fold — the safe place to merge: it can check that
+    neighbours share attributes and carry string (not embed) content."""
 
-    def test_strips_empty_added_and_deleted(self):
-        self.assertEqual(strip_empty(r'\added{}' + H + r'\deleted{}' + H), '')
-
-    def test_keeps_non_empty(self):
-        s = r'\added{x}' + H
-        self.assertEqual(strip_empty(s), s)
-
-    def test_strips_empty_between_real(self):
-        self.assertEqual(strip_empty(r'a\added{}' + H + 'b'), 'ab')
-
-    def test_empty_inputs(self):
-        self.assertEqual(strip_empty(''), '')
-        self.assertIsNone(strip_empty(None))
-
-
-class TestMergeAdjacentDiffCommands(unittest.TestCase):
-    """Consecutive same-status diff commands fold into one (empties stripped);
-    different statuses and nested-brace operands are left alone."""
-
-    def test_folds_two_added(self):
+    def test_merges_same_attributes(self):
         self.assertEqual(
-            merge_diff(r'\added{A}' + H + r'\added{B}' + H), r'\added{AB}' + H)
+            coalesce([{'insert': 'a', 'attributes': {'ncquill_diff': 'new'}},
+                      {'insert': 'b', 'attributes': {'ncquill_diff': 'new'}}]),
+            [{'insert': 'ab', 'attributes': {'ncquill_diff': 'new'}}])
 
-    def test_folds_run_of_three_with_empty(self):
+    def test_merges_same_formatting_too(self):
+        a = {'insert': 'one', 'attributes': {'italic': True, 'ncquill_diff': 'new'}}
+        b = {'insert': ' two', 'attributes': {'italic': True, 'ncquill_diff': 'new'}}
+        self.assertEqual(coalesce([a, b]),
+                         [{'insert': 'one two',
+                           'attributes': {'italic': True, 'ncquill_diff': 'new'}}])
+
+    def test_does_not_merge_different_attributes(self):
+        a = {'insert': 'new', 'attributes': {'bold': True, 'ncquill_diff': 'new'}}
+        d = {'insert': 'old', 'attributes': {'italic': True, 'ncquill_diff': 'removed'}}
+        self.assertEqual(coalesce([a, d]), [a, d])
+
+    def test_drops_empty_string_ops(self):
         self.assertEqual(
-            merge_diff(r'\added{A}' + H + r'\added{}' + H + r'\added{B}' + H),
-            r'\added{AB}' + H)
+            coalesce([{'insert': 'a', 'attributes': {'ncquill_diff': 'new'}},
+                      {'insert': '', 'attributes': {'ncquill_diff': 'new'}},
+                      {'insert': 'b', 'attributes': {'ncquill_diff': 'new'}}]),
+            [{'insert': 'ab', 'attributes': {'ncquill_diff': 'new'}}])
 
-    def test_folds_two_deleted(self):
-        self.assertEqual(
-            merge_diff(r'\deleted{A}' + H + r'\deleted{B}' + H),
-            r'\deleted{AB}' + H)
+    def test_never_merges_across_embed_object(self):
+        embed = {'insert': {'image': 'x.png'}, 'attributes': {'ncquill_diff': 'new'}}
+        ops = [{'insert': 'a', 'attributes': {'ncquill_diff': 'new'}}, embed,
+               {'insert': 'b', 'attributes': {'ncquill_diff': 'new'}}]
+        self.assertEqual(coalesce(ops), ops)
 
-    def test_leaves_nested_brace_operand(self):
-        s = r'\added{\textbf{x}}' + H + r'\added{y}' + H
-        self.assertEqual(merge_diff(s), s)
+    def test_newline_is_a_boundary(self):
+        ops = [{'insert': 'a', 'attributes': {'ncquill_diff': 'new'}},
+               {'insert': '\n'},
+               {'insert': 'b', 'attributes': {'ncquill_diff': 'new'}}]
+        self.assertEqual(coalesce(ops), ops)
 
-    def test_empty_inputs(self):
-        self.assertEqual(merge_diff(''), '')
-        self.assertIsNone(merge_diff(None))
+    def test_does_not_mutate_input(self):
+        a = {'insert': 'a', 'attributes': {'ncquill_diff': 'new'}}
+        b = {'insert': 'b', 'attributes': {'ncquill_diff': 'new'}}
+        coalesce([a, b])
+        self.assertEqual(a['insert'], 'a')
 
 
 class TestPairAdjacentDiffReplacements(unittest.TestCase):
-    """An added run immediately followed by a deleted run (an insert-first
-    replacement) folds into a single \\replaced{new}{old}."""
+    """Render-level fold of a replacement (different-status add+delete) into a
+    single \\replaced{new}{old}."""
 
     def test_pairs_added_then_deleted(self):
         self.assertEqual(
@@ -146,13 +149,13 @@ class TestPairAdjacentDiffReplacements(unittest.TestCase):
         self.assertEqual(pair_repl(r'\added{x}' + H), r'\added{x}' + H)
         self.assertEqual(pair_repl(r'\deleted{x}' + H), r'\deleted{x}' + H)
 
-    def test_leaves_nested_brace_operand(self):
-        s = r'\added{\textbf{x}}' + H + r'\deleted{y}' + H
+    def test_leaves_formatted_replacement_explicit(self):
+        s = r'\added{\textbf{new}}' + H + r'\deleted{\emph{old}}' + H
         self.assertEqual(pair_repl(s), s)
 
-    def test_full_pipeline_via_merge(self):
-        s = r'\added{New}' + H + r'\added{}' + H + r'\deleted{Old}' + H
-        self.assertEqual(merge_diff(s), r'\replaced{New}{Old}' + H)
+    def test_empty_inputs(self):
+        self.assertEqual(pair_repl(''), '')
+        self.assertIsNone(pair_repl(None))
 
 
 if __name__ == '__main__':

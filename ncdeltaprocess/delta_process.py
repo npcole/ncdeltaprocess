@@ -20,10 +20,47 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator
     from .modules import ModuleBase
 
-__all__ = ['TranslatorBase', 'TranslatorQuillJS']
+__all__ = ['TranslatorBase', 'TranslatorQuillJS', 'coalesce_adjacent_string_ops']
 
 # Type alias for a single Quill Delta operation dict.
 DeltaOp = dict[str, Any]
+
+
+def coalesce_adjacent_string_ops(ops: list[DeltaOp]) -> list[DeltaOp]:
+    """Merge adjacent ops that share attributes and carry string content.
+
+    A diff is run-fragmented: it emits many short same-attribute string inserts
+    (and empty-string inserts at op boundaries), so the renderer would otherwise
+    produce one markup command (e.g. a ``changes``-package ``\\added``) per
+    fragment. Re-normalising the run — folding neighbours into one op — collapses
+    that to a single command per run.
+
+    Safe by construction, and only where it is provably safe to do so:
+
+    * both neighbours' ``insert`` must be a **string** (an embed is a dict/object
+      and is never merged across);
+    * their **attributes must be identical** (any formatting or diff-status
+      difference is a boundary);
+    * a newline op is left as its own boundary, so block structure is untouched.
+
+    Empty-string inserts render nothing and are dropped.
+    """
+    out: list[DeltaOp] = []
+    for op in ops:
+        ins = op.get('insert')
+        if isinstance(ins, str) and ins == '':
+            continue
+        prev = out[-1] if out else None
+        if (prev is not None
+                and isinstance(ins, str) and '\n' not in ins
+                and isinstance(prev.get('insert'), str) and '\n' not in prev['insert']
+                and prev.get('attributes') == op.get('attributes')):
+            merged = dict(prev)
+            merged['insert'] = prev['insert'] + ins
+            out[-1] = merged
+        else:
+            out.append(op)
+    return out
 
 
 class TranslatorBase(object):
@@ -176,8 +213,13 @@ class TranslatorBase(object):
                 this_block = self.make_standard_text_block(*arguments)
             previous_block = this_block
 
-            # Process inline nodes within the block
-            for this_content in qblock['contents']:
+            # Process inline nodes within the block. In diff mode the contents
+            # are run-fragmented; coalesce same-attribute string runs first so
+            # the renderer emits one markup command per run, not per fragment.
+            block_contents = qblock['contents']
+            if self.DIFF_MODE:
+                block_contents = coalesce_adjacent_string_ops(block_contents)
+            for this_content in block_contents:
                 node_arguments: dict[str, Any] = {
                     'block': this_block,
                     'contents': this_content['insert'],

@@ -241,57 +241,12 @@ def merge_adjacent_inline_styles(latex: str) -> str:
     return latex
 
 
-# Diff markup commands (the ``changes`` package) emitted by ``diff_commands``
-# above, each closed with ``}\hspace{0pt}``.
-_DIFF_MERGE_CMDS = ('added', 'deleted', 'highlight')
-
-
-def strip_empty_diff_commands(latex: str) -> str:
-    """Drop empty diff markers (``\\added{}\\hspace{0pt}`` etc.).
-
-    A run-fragmented diff often emits empty change commands at op boundaries;
-    they render nothing but each is still a ``changes``-package call the LaTeX
-    engine must process. Removing them is purely cosmetic-free.
-    """
-    if not latex:
-        return latex
-    for cmd in _DIFF_MERGE_CMDS:
-        latex = latex.replace('\\' + cmd + '{}\\hspace{0pt}', '')
-    return latex
-
-
-def merge_adjacent_diff_commands(latex: str) -> str:
-    """Coalesce consecutive **same-status** diff commands into one.
-
-    ``\\added{A}\\hspace{0pt}\\added{B}\\hspace{0pt}`` →
-    ``\\added{AB}\\hspace{0pt}``. A document changed throughout (e.g. a clause
-    reformatted word-by-word) otherwise renders as thousands of separate
-    ``\\added``/``\\deleted`` commands — each a comparatively slow ``changes``-
-    package invocation — which bloats the LaTeX and can make it compile-bound
-    (the redline of a ~120KB document produced ~210KB of markup and timed out).
-
-    Conservative by design, mirroring :func:`merge_adjacent_inline_styles`: only
-    **brace-free** content is folded (so nested formatting like
-    ``\\added{\\textbf{x}}`` is left untouched), and **different** statuses
-    (``\\added`` vs ``\\deleted``) are never merged. The dropped inter-command
-    ``\\hspace{0pt}`` is a zero-width breakpoint only; the merged run keeps its
-    own trailing one and still breaks at the spaces inside it.
-    """
-    if not latex:
-        return latex
-    latex = strip_empty_diff_commands(latex)
-    for cmd in _DIFF_MERGE_CMDS:
-        pattern = re.compile(
-            r'\\' + cmd + r'\{([^{}]*)\}\\hspace\{0pt\}\\' + cmd + r'\{([^{}]*)\}')
-        prev = None
-        while prev != latex:           # fold runs of three or more
-            prev = latex
-            latex = pattern.sub(r'\\' + cmd + r'{\1\2}', latex)
-    return pair_adjacent_diff_replacements(latex)
-
-
 # An added run immediately followed by a deleted run is a *replacement* — the
 # diff renders it added-then-deleted (new text, then the struck-through old).
+# (Same-status runs and empty markers are folded earlier, at the op level, by
+# ``coalesce_adjacent_string_ops`` — that is where attribute equality and
+# string-vs-embed can be checked safely. This render-level fold only pairs the
+# two *different*-status runs of a replacement, which is not an op merge.)
 _REPLACE_PAIR_RE = re.compile(
     r'\\added\{([^{}]*)\}\\hspace\{0pt\}\\deleted\{([^{}]*)\}\\hspace\{0pt\}')
 
@@ -300,14 +255,19 @@ def pair_adjacent_diff_replacements(latex: str) -> str:
     """Fold an adjacent added+deleted pair into a single ``\\replaced`` command.
 
     ``\\added{new}\\hspace{0pt}\\deleted{old}\\hspace{0pt}`` →
-    ``\\replaced{new}{old}\\hspace{0pt}``. The diff renders every word-level
-    edit as a *replacement* — an added run (the new text) immediately followed
-    by a deleted run (the struck-through old text) — i.e. two ``changes``-package
-    commands. ``\\replaced{new}{old}`` is the package's own single-command form
-    for exactly this, rendering identically (new text, then old struck) while
-    roughly halving the comparatively slow ``changes`` commands in heavily-
-    revised text. Conservative: only brace-free operands are folded, so a pair
-    wrapping nested formatting is left as the explicit add/delete.
+    ``\\replaced{new}{old}\\hspace{0pt}``. The diff renders a word-level edit as
+    a *replacement* — an added run (new text) immediately followed by a deleted
+    run (struck-through old text) — i.e. two ``changes``-package commands.
+    ``\\replaced{new}{old}`` is the package's own single-command form for exactly
+    this, rendering identically (new text, then old struck) while roughly halving
+    the comparatively slow ``changes`` commands in heavily-revised text.
+
+    Conservative: only **brace-free** operands are folded, so a pair wrapping
+    nested formatting (e.g. deleting italic and inserting bold —
+    ``\\added{\\textbf{new}}\\hspace{0pt}\\deleted{\\emph{old}}``) is left as the
+    explicit add/delete. Only insert-first (added-then-deleted) pairs match, so
+    delete-before-insert ordering is never folded (``\\replaced`` renders
+    new-first and would otherwise flip it).
     """
     if not latex:
         return latex

@@ -97,12 +97,13 @@ class RenderMixin(object):
                     stack.append((c, False))
         result = output.merge()
         if mode == 'latex':
-            # Fold run-fragmented diff markup so a heavily-changed document
-            # doesn't emit thousands of separate, slow changes-package commands
-            # (\added/\deleted) — which bloat the LaTeX and can make it
-            # compile-bound. No-op when there is no diff markup.
-            from .latex_line_render import merge_adjacent_diff_commands
-            result = merge_adjacent_diff_commands(result)
+            # Fold each replacement (an added run immediately followed by a
+            # deleted run) into the changes package's single \replaced command,
+            # halving the slow changes commands in heavily-revised text. (Same-
+            # status runs and empty markers were already folded at the op level
+            # by coalesce_adjacent_string_ops.) No-op when there is no diff markup.
+            from .latex_line_render import pair_adjacent_diff_replacements
+            result = pair_adjacent_diff_replacements(result)
         return result
 
 
