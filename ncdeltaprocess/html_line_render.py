@@ -95,7 +95,14 @@ class LineRenderHTML(object):
                 current_output = f'<a href="{link}">{current_output}</a>'
         if 'anchor' in self.host.attributes:
             anchor_id = _html.escape(self.host.attributes['anchor'], quote=True)
-            current_output = f'<a class="anchor" id="{anchor_id}">{current_output}</a>'
+            # Emit the anchor as an empty, *prepended* scroll target rather
+            # than wrapping the run's content. Wrapping the content in an
+            # <a> lets global link styling (e.g. ``a { font-weight: 600 }``)
+            # bleed onto it — which made the first run of a diff change
+            # render bold while the rest of the same change did not. This
+            # mirrors the LaTeX renderer's ``\hypertarget{..}{}`` (empty
+            # target followed by the content).
+            current_output = f'<a class="anchor" id="{anchor_id}"></a>{current_output}'
         return current_output
 
     def pre_process_line(self, line: str) -> str:
