@@ -156,6 +156,24 @@ class TranslatorBase(object):
         # render_tree already folds run-fragmented diff markup for latex mode.
         return merge_adjacent_inline_styles(latex)
 
+    def translate_to_plain_text(self, delta_ops: list[DeltaOp]) -> str:
+        """Extract readable plain text from delta ops.
+
+        This is the concatenation of the string ``insert`` values — exactly
+        what Quill's own ``getText()`` returns. Block-level attributes (header,
+        list, blockquote, …) live on ``"\\n"`` inserts whose newline character
+        is already part of the string, so line breaks are preserved without any
+        tree walk. Embeds (images and other non-string inserts) contribute
+        nothing. Use for previews, truncation and search indexing — never feed
+        the raw ``[{"insert": …}]`` JSON to those.
+        """
+        parts = []
+        for op in delta_ops:
+            insert = op.get('insert') if isinstance(op, dict) else None
+            if isinstance(insert, str):
+                parts.append(insert)
+        return ''.join(parts)
+
     def ops_to_internal_representation(
         self,
         delta_ops: list[DeltaOp],
