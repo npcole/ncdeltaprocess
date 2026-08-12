@@ -220,7 +220,11 @@ class TranslatorBase(object):
                     f"{[t.__name__ for t in matched_tests]} for {qblock}"
                 )
             else:
-                if self.DIFF_MODE and ''.join(
+                # A non-string insert is an embed (image, …) — real content,
+                # so the block is never blank; joining it would also TypeError.
+                if self.DIFF_MODE and all(
+                    isinstance(s['insert'], str) for s in qblock['contents']
+                ) and ''.join(
                     s['insert'] for s in qblock['contents']
                 ) in ('', '\n'):
                     if debug:

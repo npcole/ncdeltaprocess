@@ -204,6 +204,36 @@ class TestDiffMode(unittest.TestCase):
         # The blank paragraph should be skipped
         self.assertEqual(html.count('<p>'), 2)
 
+    def test_diff_mode_embed_block_is_not_blank(self):
+        """A block whose contents include an embed (dict insert) is real
+        content: it must render, not crash the blank-block check with
+        ``TypeError: expected str instance, dict found``."""
+        ops = [
+            {'insert': 'Some text\n'},
+            {'insert': {'image': 'https://example.com/x.png'}},
+            {'insert': '\n'},
+            {'insert': 'More text\n'},
+        ]
+        t = TranslatorQuillJS(diff_mode=True)
+        html = t.translate_to_html(ops)
+        self.assertIn('<img src="https://example.com/x.png">', html)
+        self.assertIn('Some text', html)
+        self.assertIn('More text', html)
+
+    def test_diff_mode_embed_mid_paragraph(self):
+        """An inline embed after text in the same block must also survive
+        diff mode, including with diff attributes on the runs."""
+        ops = [
+            {'insert': 'Before ', 'attributes': {'ncquill_diff': 'insert'}},
+            {'insert': {'image': 'https://example.com/y.png'}},
+            {'insert': ' after\n'},
+        ]
+        t = TranslatorQuillJS(diff_mode=True)
+        html = t.translate_to_html(ops)
+        self.assertIn('<img src="https://example.com/y.png">', html)
+        self.assertIn('Before', html)
+        self.assertIn('after', html)
+
     def test_diff_mode_css_classes_insert(self):
         ops = [
             {'insert': 'New text', 'attributes': {'ncquill_diff': 'insert'}},
