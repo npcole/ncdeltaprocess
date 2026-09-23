@@ -195,17 +195,28 @@ class LineRenderLaTeX(object):
         if font and font in self.font_types:
             output = f'{self.font_types[font]}{{{output}}}'
 
-        anchor = attrs.get('anchor')
-        if anchor:
-            safe_anchor = sanitize_latex_label(anchor)
-            output = r'\hypertarget{' + safe_anchor + r'}{}' + output
-
         # Diff markup (ncquill_diff or quill_diff attributes). Applied
         # last so it wraps all other formatting.
         diff_val = attrs.get('ncquill_diff') or attrs.get('quill_diff')
         if diff_val and diff_val in self.diff_commands:
             open_cmd, close_cmd = self.diff_commands[diff_val]
             output = open_cmd + output + close_cmd
+
+        # The anchor is a zero-width POSITION marker, not formatting, so it
+        # is prepended AFTER the diff wrapper and therefore sits outside
+        # it. Inside, it does not compile: hyperref's anchor machinery
+        # does not survive the argument of the changes package's
+        # \added / \deleted -- \added{\hypertarget{a}{} x} gives
+        # "Undefined control sequence" in \@hyper@@anchor, and \deleted
+        # "Bad space factor (0)", whatever the anchor is named and whether
+        # or not its text is empty. This also puts the two renderers in
+        # agreement: the HTML side already emits the anchor outside the
+        # diff span, because ``add_links`` is post-processing
+        # (html_line_render.add_links).
+        anchor = attrs.get('anchor')
+        if anchor:
+            safe_anchor = sanitize_latex_label(anchor)
+            output = r'\hypertarget{' + safe_anchor + r'}{}' + output
 
         return output
 
