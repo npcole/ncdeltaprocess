@@ -123,8 +123,19 @@ class BetterTableModule(ModuleBase):
                 )
 
             elif isinstance(previous_block.parent, bks.TableBetterCellBlock):
-                # Same cell?
-                if previous_block.parent.cell_id == cell_line['cell']:
+                # Same cell? A cell id is only unique WITHIN its row, so
+                # the row has to be compared too. quill-better-table's own
+                # editor writes globally random ids (``cell-6jeu``) and the
+                # two tests never diverge there, but stored documents carry
+                # per-row ordinals -- every row's cells numbered "1", "2".
+                # Matching on the cell id alone then read the next row's
+                # first cell as a continuation of the previous row's last
+                # one whenever the two ids collided, which is every row
+                # boundary following a single-cell (colspan) row: the text
+                # was filed into the wrong cell and the new row lost one,
+                # in the HTML as well as the LaTeX.
+                if (previous_block.parent.cell_id == cell_line['cell']
+                        and previous_block.parent.row_id == cell_line['row']):
                     return previous_block.parent.add_node(
                         CELL_BLOCK(last_block=previous_block)
                     )

@@ -7,7 +7,9 @@ Not to be confused with quill-better-table (handled by the core translator).
 quill-table-better uses 'style' attributes more heavily and defines
 heading and list blocks for use *inside* tables. It does not use
 separate hidden column-definition blocks — column info is derived
-from the first row's cells.
+from the first row's cells, which is why a table whose later rows are
+wider than its first needs the occupancy walk in
+``block.plan_latex_table_columns`` rather than that column list alone.
 """
 
 from __future__ import annotations
@@ -17,7 +19,9 @@ import html as _html
 import re
 import weakref
 from typing import Any
-from ..block import RenderOpenCloseMixin, Block, TextBlockParagraph
+from ..block import (RenderOpenCloseMixin, Block, TextBlockParagraph,
+                     plan_latex_table_columns, open_latex_table,
+                     close_latex_table, cell_latex_separator)
 from ..document import QDocument
 from ..render import OutputObject
 from ..sanitize import CSS_SAFE_PATTERN
@@ -151,17 +155,26 @@ class TableBetterModule(ModuleBase):
         elif isinstance(previous_block, TableBetter2CellBlock):
             previous_cell = previous_block
         else:
-            test_block: Block = previous_block
+            test_block: Block | None = previous_block
             previous_cell: TableBetter2CellBlock | None = None
-            while test_block is not this_document:
-                if isinstance(test_block.parent, TableBetter2CellBlock):
+            while test_block is not None and test_block is not this_document:
+                if isinstance(getattr(test_block, 'parent', None), TableBetter2CellBlock):
                     previous_cell = test_block.parent
                     break
-                test_block = test_block.parent
+                test_block = getattr(test_block, 'parent', None)
             if previous_cell is None:
-                raise ValueError(
-                    f"Can't find previous cell! {cell_info=} {previous_block=}"
+                # No enclosing table/cell -- a cell line arrived with no
+                # preceding ``table-temporary`` block (a table that opens a
+                # document, or ``{"table-cell": {}}`` on its own). The walk
+                # ran off the top and dereferenced None; and raising here
+                # failed the whole render over one malformed line.
+                # Synthesise a table so the cell still renders.
+                new_table = this_document.add_block(
+                    TableBetter2Block(parent=this_document, attributes={},
+                                      last_block=previous_block)
                 )
+                new_row = new_table.add_row(cell_info.row_id)
+                return new_row.add_cell(cell_info.cell_id, **cell_kw)
 
         # Same cell?
         if (cell_info.cell_id == previous_cell.cell_id
@@ -336,25 +349,22 @@ class TableBetter2Block(RenderOpenCloseMixin, Block):
         return '</table>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        n = len(self._columns) or 1
-        # Equal-width wrapping columns that share \linewidth; longtable
-        # allows the table to break across pages.
-        col_width = f'{0.9 / n:.2f}\\linewidth'
-        cols = '|'.join(f'p{{{col_width}}}' for _ in range(n))
-        if cols:
-            cols = '|' + cols + '|'
-        return (
-            r'\par\medskip' '\n'
-            r'\begin{longtable}{' + cols + r'}' '\n'
-            r'\hline' '\n'
-        )
+        # This dialect derives its columns from the FIRST row's cells, so a
+        # later, wider row overran the spec and the compile died on it --
+        # the same fault ``plan_latex_table_columns`` was written for in
+        # the other two legacy readers. Its column count is a floor here
+        # exactly as a ``table-col`` group is there.
+        return open_latex_table(
+            plan_latex_table_columns(self, declared_columns=len(self._columns)))
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\end{longtable}' '\n' r'\medskip' '\n'
+        return close_latex_table()
 
 
 class TableBetter2RowBlock(RenderOpenCloseMixin, Block):
     """Row block for quill-table-better format."""
+    #: Read by ``plan_latex_table_columns``.
+    is_latex_table_row = True
     def __init__(self, row_id: str, *args: Any, **keywords: Any) -> None:
         super().__init__(*args, **keywords)
         self.row_id: str = row_id
@@ -393,6 +403,10 @@ class TableBetter2RowBlock(RenderOpenCloseMixin, Block):
 
 class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
     """Cell block for quill-table-better format."""
+    #: Read by ``plan_latex_table_columns``, which fills the other two.
+    is_latex_table_cell = True
+    latex_cell_open: str | None = None
+    latex_cell_close: str = ''
     def __init__(
         self,
         row_id: str,
@@ -448,15 +462,14 @@ class TableBetter2CellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        stack = output_object.cell_position_stack
-        if not stack:
-            return ''
-        pos = stack[-1]
-        stack[-1] = pos + 1
-        return '' if pos == 0 else ' & '
+        # Was a hand-copied duplicate of the shared separator, which is
+        # how this dialect also came to miss the span wrappers.
+        if self.latex_cell_open is None:
+            return cell_latex_separator(output_object)
+        return self.latex_cell_open
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return ''
+        return self.latex_cell_close
 
 
 class TableBetter2CellHeadingBlock(RenderOpenCloseMixin, Block):

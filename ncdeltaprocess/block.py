@@ -43,6 +43,10 @@ __all__ = [
     'TableBetterCellBlock',
     'TableColumnDescriptor',
     'BetterTableBlock',
+    'plan_latex_table_columns',
+    'open_latex_table',
+    'close_latex_table',
+    'cell_latex_separator',
 ]
 
 
@@ -434,11 +438,32 @@ class ListItemBlock(RenderOpenCloseMixin, Block):
 
 
 class TableBlock(RenderOpenCloseMixin, Block):
+    """A table in the legacy Quill 2.x dialect (``modules/table_quill2.py``).
+
+    This class carried ``open_tag``/``close_tag`` and NOTHING for LaTeX,
+    while the rows and cells beneath it emitted ``&``, ``\\\\`` and
+    ``\\hline`` regardless -- alignment material with no alignment
+    around it. ``render_tree`` asks for ``open_latex`` with ``getattr``
+    and skips the close when the attribute is absent, so the omission
+    was silent, and the result could not compile at all: pdflatex gives
+    "Misplaced alignment tab character &" and "Misplaced \\noalign"
+    and produces no PDF. Every stored document in this dialect was an
+    unprintable report waiting to happen.
+    """
+
     def open_tag(self, output_object: OutputObject) -> str:
         return '<table>'
 
     def close_tag(self, output_object: OutputObject) -> str:
         return '</table>'
+
+    def open_latex(self, output_object: OutputObject) -> str:
+        # This dialect has no column descriptors at all, so the rows are
+        # the only statement of how wide the table is.
+        return open_latex_table(plan_latex_table_columns(self))
+
+    def close_latex(self, output_object: OutputObject) -> str:
+        return close_latex_table()
 
 
 class BetterTableBlock(RenderOpenCloseMixin, Block):
@@ -470,22 +495,19 @@ class BetterTableBlock(RenderOpenCloseMixin, Block):
         return '</table>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        n = len(self._columns) or 1
-        # Equal-width wrapping columns that share \linewidth; longtable
-        # allows the table to break across pages.
-        col_width = f'{0.9 / n:.2f}\\linewidth'
-        cols = '|'.join(f'p{{{col_width}}}' for _ in range(n))
-        return (
-            r'\par\medskip' '\n'
-            r'\begin{longtable}{|' + cols + r'|}' '\n'
-            r'\hline' '\n'
-        )
+        return open_latex_table(
+            plan_latex_table_columns(self, declared_columns=len(self._columns)))
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return r'\end{longtable}' '\n' r'\medskip' '\n'
+        return close_latex_table()
 
 
 class TableRowBlock(RenderOpenCloseMixin, Block):
+    #: Read by :func:`plan_latex_table_columns`. A marker rather than an
+    #: ``isinstance`` check because the table dialects in ``modules/``
+    #: import this module, so it cannot import them back.
+    is_latex_table_row = True
+
     def __init__(self, row_id: str, *args: Any, **keywords: Any) -> None:
         super(TableRowBlock, self).__init__(*args, **keywords)
         self.row_id: str = row_id
@@ -516,6 +538,19 @@ class TableRowBlock(RenderOpenCloseMixin, Block):
 
 
 class TableCellBlock(RenderOpenCloseMixin, Block):
+    #: Read by :func:`plan_latex_table_columns` -- see TableRowBlock.
+    is_latex_table_cell = True
+    #: Filled by :func:`plan_latex_table_columns` before this cell
+    #: renders: everything it must emit before its content (separators,
+    #: multicolumn, multirow) and the braces that close them. ``None``
+    #: means no table planned this cell, and it falls back to the
+    #: shared separator.
+    latex_cell_open: str | None = None
+    latex_cell_close: str = ''
+    #: Spans; the legacy Quill 2.x dialect declares neither.
+    col_span: int | None = None
+    row_span: int | None = None
+
     def open_tag(self, output_object: OutputObject) -> str:
         return '<td>'
 
@@ -523,13 +558,28 @@ class TableCellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        return _cell_latex_separator(output_object)
+        if self.latex_cell_open is None:
+            return cell_latex_separator(output_object)
+        return self.latex_cell_open
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return ''
+        return self.latex_cell_close
 
 
 class TableBetterCellBlock(RenderOpenCloseMixin, Block):
+    #: Read by :func:`plan_latex_table_columns` -- see TableRowBlock.
+    is_latex_table_cell = True
+    #: Filled by :func:`plan_latex_table_columns` before this cell
+    #: renders: everything it must emit before its content (separators,
+    #: multicolumn, multirow) and the braces that close them. ``None``
+    #: means no table planned this cell, and it falls back to the
+    #: shared separator.
+    latex_cell_open: str | None = None
+    latex_cell_close: str = ''
+    #: Spans; the legacy Quill 2.x dialect declares neither.
+    col_span: int | None = None
+    row_span: int | None = None
+
     def __init__(
         self,
         row_id: str,
@@ -554,13 +604,188 @@ class TableBetterCellBlock(RenderOpenCloseMixin, Block):
         return '</td>'
 
     def open_latex(self, output_object: OutputObject) -> str:
-        return _cell_latex_separator(output_object)
+        if self.latex_cell_open is None:
+            return cell_latex_separator(output_object)
+        return self.latex_cell_open
 
     def close_latex(self, output_object: OutputObject) -> str:
-        return ''
+        return self.latex_cell_close
 
 
-def _cell_latex_separator(output_object: OutputObject) -> str:
+#: Share of ``\linewidth`` a table's columns divide between them. The
+#: remainder is the margin the surrounding environments expect.
+_TABLE_LINEWIDTH_SHARE = 0.9
+
+def close_latex_table() -> str:
+    """Close the environment :func:`open_latex_table` opened."""
+    return r'\end{longtable}' '\n' r'\medskip' '\n'
+
+
+def _table_rows_and_cells(table):
+    """The table's rows, each as its ordered list of cell blocks.
+
+    Read by marker rather than by ``isinstance`` because the dialects in
+    ``modules/`` import this module, so it cannot import them back.
+    """
+    return [[cell for cell in row.contents
+             if getattr(cell, 'is_latex_table_cell', False)]
+            for row in table.contents
+            if getattr(row, 'is_latex_table_row', False)]
+
+
+def _occupancy_walk(rows_cells, n_cols=None):
+    r"""Walk the table's occupancy grid, yielding each cell's placement.
+
+    The usual grid walk, and the one thing a per-cell renderer cannot do
+    for itself: a cell claims ``colspan`` columns starting at the first
+    column no earlier row's ``rowspan`` still reserves, and reserves
+    those columns for the rows it spans downward. A covered position
+    carries NO cell of its own in any of these wire formats, so a row
+    that must skip a column has no way to know it from its own contents.
+
+    Yields ``(cell, column, span, rows_below, slots_before)`` per cell,
+    then ``(None, width, 0, 0, slots)`` at the end of each row so a
+    caller can see how wide the row came out. ``slots_before`` counts
+    the ``&``-separated positions already used in the row, blank fillers
+    for reserved columns included. ``n_cols`` clamps the spans; ``None``
+    measures instead, which is how the width is found before there is a
+    width to clamp to.
+
+    Trailing reservations included: a row can END inside a reservation
+    and so be wider than any cell of its own shows.
+    """
+    reserved = {}
+    for cells in rows_cells:
+        claimed_below = {}
+        column = 0
+        slots = 0
+        for cell in cells:
+            while reserved.get(column, 0) > 0:
+                column += 1
+                slots += 1          # a blank filler holds one slot
+            span = max(1, cell.col_span or 1)
+            if n_cols is not None:
+                # Defensive: the measuring pass already made n_cols wide
+                # enough for every span, so this cannot bite for data it
+                # measured. \multicolumn wider than the spec is the
+                # compile error all of this exists to prevent.
+                span = max(1, min(span, n_cols - column))
+            rows_below = max(1, cell.row_span or 1) - 1
+            yield cell, column, span, rows_below, slots
+            if rows_below:
+                for occupied in range(column, column + span):
+                    claimed_below[occupied] = rows_below
+            column += span
+            slots += 1
+        trailing = max((index + 1 for index, rows in reserved.items()
+                        if rows > 0), default=0)
+        yield None, max(column, trailing), 0, 0, slots
+        reserved = {index: rows - 1
+                    for index, rows in reserved.items() if rows > 1}
+        reserved.update(claimed_below)
+
+
+def plan_latex_table_columns(table, declared_columns=0):
+    r"""Return the table's LaTeX column count, and prepare its cells.
+
+    A ``longtable`` preamble fixes the row width for the whole table, so
+    a row that emits more ``&``-separated slots than the preamble
+    declares does not render badly -- pdflatex refuses it outright with
+    "Extra alignment tab has been changed to \cr", one error per surplus
+    slot and no PDF at all. Column descriptors therefore cannot be the
+    whole answer, because stored data need not agree with them.
+    Documents exist whose cells outlived their column group entirely --
+    concurrent edits can delete a table while another client inserts a
+    row into it, and a delete can never remove concurrently-inserted
+    content -- and sized from the descriptors alone such a table became
+    a ONE-column ``longtable`` full of alignment tabs, which took a
+    whole report down with it.
+
+    So the descriptors are a FLOOR and the measured grid is the other
+    floor; the table takes whichever is larger and can therefore only
+    grow. The grid is MEASURED, not counted, because neither the cells
+    nor the sum of their spans is the width: a row under a ``rowspan``
+    from above is wider than its own cell list shows, and a row can end
+    inside a reservation and be wider than any cell it holds.
+
+    **Cells are prepared here, not in the cell.** Each is given the exact
+    string it must emit (``latex_cell_open`` / ``latex_cell_close``): the
+    ``&`` separators that carry it to its column -- one per blank slot a
+    ``rowspan`` from above has reserved -- and its ``\multicolumn`` /
+    ``\multirow`` wrappers. None of that is knowable from inside a cell,
+    which can see neither its siblings nor the rows before it. A table's
+    ``open_latex`` runs immediately before its rows and cells render,
+    which is what makes preparing them here work.
+
+    Any dialect can use this: a row marks itself ``is_latex_table_row``,
+    a cell ``is_latex_table_cell`` and carries ``col_span`` /
+    ``row_span``. All three table readers (``table_quill2``,
+    ``table_better_table``, ``table_better``) had written the same
+    ``len(self._columns) or 1`` independently and were wrong in the same
+    way.
+
+    A span is HONOURED, never clipped: it is the document's statement of
+    its own structure, so a title spanning nine columns above a row that
+    fills two is a nine-column table. Clipping it to keep the table
+    narrow would render a different table than the one stored.
+    """
+    rows_cells = _table_rows_and_cells(table)
+    measured = max((width for cell, width, _span, _rows, _slots
+                    in _occupancy_walk(rows_cells) if cell is None),
+                   default=0)
+    n_cols = max(declared_columns, measured, 1)
+    column_share = _TABLE_LINEWIDTH_SHARE / n_cols
+
+    # Separators already emitted in the current row. A cell emits the ones
+    # between it and the PREVIOUS cell -- one per blank slot a rowspan from
+    # above reserved, plus the one that ends the previous cell -- not one
+    # per slot before it, which would double every separator after the
+    # second cell in a row.
+    emitted = 0
+    for cell, column, span, rows_below, slots_before in _occupancy_walk(
+            rows_cells, n_cols):
+        if cell is None:
+            emitted = 0          # row ended
+            continue
+        opener = ' & ' * (slots_before - emitted)
+        emitted = slots_before
+        closer = ''
+        if span > 1:
+            width = f'{column_share * span:.2f}\\linewidth'
+            # A \multicolumn replaces the columns it covers, rules
+            # included, so only a cell starting at column 0 restores the
+            # table's left rule; anywhere else the preceding column has
+            # already drawn it.
+            left_rule = '|' if column == 0 else ''
+            opener += (r'\multicolumn{' + str(span) + '}{'
+                       + left_rule + 'p{' + width + '}|}{')
+            closer = '}' + closer
+        if rows_below:
+            # \multirow INSIDE \multicolumn: the column wrapper has to
+            # be the outer one for the width it names to mean anything.
+            opener += r'\multirow{' + str(rows_below + 1) + '}{*}{'
+            closer = '}' + closer
+        cell.latex_cell_open = opener
+        cell.latex_cell_close = closer
+    return n_cols
+
+
+def open_latex_table(n_cols: int) -> str:
+    """Open a ``longtable`` of ``n_cols`` equal wrapping columns.
+
+    ``longtable`` rather than ``tabular`` so the table may break across
+    pages, which a signature block or a long schedule routinely does.
+    """
+    column_width = f'{_TABLE_LINEWIDTH_SHARE / n_cols:.2f}\\linewidth'
+    columns = '|'.join(f'p{{{column_width}}}' for _ in range(n_cols))
+    return (
+        r'\par\medskip' '\n'
+        r'\begin{longtable}{|' + columns + r'|}' '\n'
+        r'\hline' '\n'
+    )
+
+
+def cell_latex_separator(output_object: OutputObject) -> str:
     """Return '' for the first cell in the current row, ' & ' for the rest.
 
     Reads the per-row counter pushed by the enclosing row's ``open_latex``
